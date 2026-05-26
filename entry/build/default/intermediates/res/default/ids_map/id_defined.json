@@ -59,5 +59,9 @@
 			"type":	"profile",
 			"name":	"main_pages",
 			"id":	"0x0100000E"
+		}, {
+			"type":	"string",
+			"name":	"permission_read_image_reason",
+			"id":	"0x0100000F"
 		}]
 }

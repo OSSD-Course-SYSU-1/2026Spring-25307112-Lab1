@@ -29,6 +29,15 @@
 		"deliveryWithInstall":	true,
 		"installationFree":	false,
 		"pages":	"$profile:main_pages",
+		"requestPermissions":	[{
+				"name":	"ohos.permission.READ_IMAGEVIDEO",
+				"reason":	"$string:permission_read_image_reason",
+				"usedScene":	{
+					"abilities":	["EntryAbility"],
+					"when":	"inuse"
+				},
+				"reasonId":	16777231
+			}],
 		"abilities":	[{
 				"name":	"EntryAbility",
 				"srcEntry":	"./ets/entryability/EntryAbility.ets",

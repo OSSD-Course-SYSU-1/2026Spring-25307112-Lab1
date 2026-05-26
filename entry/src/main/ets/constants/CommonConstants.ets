@@ -25,6 +25,215 @@ export interface FilterOption {
 }
 // [End FilterOption]
 
+// [Start AdjustParams]
+/**
+ * Interface for image adjustment parameters
+ * Each parameter ranges from 0 to 200, where 100 is the default/neutral value
+ */
+export interface AdjustParams {
+  brightness: number;   // 亮度: 0-200, 100=正常
+  contrast: number;     // 对比度: 0-200, 100=正常
+  saturation: number;   // 饱和度: 0-200, 100=正常
+  hue: number;          // 色相旋转: 0-360度
+  warmth: number;       // 色温: 0-200, 100=正常(冷<100<暖)
+  exposure: number;     // 曝光: 0-200, 100=正常
+  gamma: number;        // 伽马: 0-200, 100=正常(1.0)
+}
+
+/**
+ * Default adjustment parameters (all neutral values)
+ */
+export const DEFAULT_ADJUST_PARAMS: AdjustParams = {
+  brightness: 100,
+  contrast: 100,
+  saturation: 100,
+  hue: 0,
+  warmth: 100,
+  exposure: 100,
+  gamma: 100
+};
+
+/**
+ * Clamp value to a range
+ */
+function clamp(value: number, min: number, max: number): number {
+  if (isNaN(value) || !isFinite(value)) {
+    return (min + max) / 2;
+  }
+  return Math.max(min, Math.min(max, value));
+}
+
+/**
+ * Generate a color matrix from adjustment parameters
+ * @param params Adjustment parameters
+ * @returns 5x4 color matrix array
+ */
+export function generateAdjustMatrix(params: AdjustParams): number[] {
+  // 安全获取参数值，确保在有效范围内
+  const brightnessVal = clamp(params.brightness, 0, 200);
+  const contrastVal = clamp(params.contrast, 1, 200); // 避免为0
+  const saturationVal = clamp(params.saturation, 0, 200);
+  const hueVal = clamp(params.hue, 0, 360);
+  const warmthVal = clamp(params.warmth, 0, 200);
+  const exposureVal = clamp(params.exposure, 0, 200);
+  const gammaVal = clamp(params.gamma, 1, 200); // 避免为0
+  
+  // 亮度调整 (brightness: 0-200, 100=正常)
+  const brightness = (brightnessVal - 100) / 100; // -1 to 1
+  
+  // 对比度调整 (contrast: 0-200, 100=正常)
+  const contrast = contrastVal / 100; // 0.01 to 2
+  
+  // 饱和度调整 (saturation: 0-200, 100=正常)
+  const saturation = saturationVal / 100; // 0 to 2
+  
+  // 色相旋转角度 (hue: 0-360)
+  const hueRad = hueVal * Math.PI / 180;
+  const hueCos = Math.cos(hueRad);
+  const hueSin = Math.sin(hueRad);
+  
+  // 色温调整 (warmth: 0-200, 100=正常)
+  const warmthOffset = (warmthVal - 100) / 500; // -0.2 to 0.2
+  
+  // 曝光调整 (exposure: 0-200, 100=正常)
+  const exposureFactor = (exposureVal - 100) / 50;
+  const exposure = Math.pow(2, clamp(exposureFactor, -2, 2)); // 限制在合理范围
+  
+  // 伽马调整 (gamma: 0-200, 100=正常, gamma=1.0)
+  const gamma = gammaVal / 100; // 0.01 to 2
+  
+  // 构建组合矩阵 - 使用更简单安全的方式
+  // 基础矩阵：亮度 + 对比度
+  const baseMatrix: number[] = [
+    contrast, 0, 0, 0, brightness,
+    0, contrast, 0, 0, brightness,
+    0, 0, contrast, 0, brightness,
+    0, 0, 0, 1, 0
+  ];
+  
+  // 饱和度矩阵
+  const satMatrix: number[] = [
+    0.213 + 0.787 * saturation, 0.715 - 0.715 * saturation, 0.072 - 0.072 * saturation, 0, 0,
+    0.213 - 0.213 * saturation, 0.715 + 0.285 * saturation, 0.072 - 0.072 * saturation, 0, 0,
+    0.213 - 0.213 * saturation, 0.715 - 0.715 * saturation, 0.072 + 0.928 * saturation, 0, 0,
+    0, 0, 0, 1, 0
+  ];
+  
+  // 色相旋转矩阵
+  const hueMatrix: number[] = [
+    0.213 + hueCos * 0.787 - hueSin * 0.213, 0.715 - hueCos * 0.715 - hueSin * 0.715, 0.072 - hueCos * 0.072 + hueSin * 0.928, 0, 0,
+    0.213 - hueCos * 0.213 + hueSin * 0.143, 0.715 + hueCos * 0.285 + hueSin * 0.140, 0.072 - hueCos * 0.072 - hueSin * 0.283, 0, 0,
+    0.213 - hueCos * 0.213 - hueSin * 0.787, 0.715 - hueCos * 0.715 + hueSin * 0.715, 0.072 + hueCos * 0.928 + hueSin * 0.072, 0, 0,
+    0, 0, 0, 1, 0
+  ];
+  
+  // 色温矩阵
+  const warmthMatrix: number[] = [
+    1, 0, 0, 0, warmthOffset,
+    0, 1, 0, 0, 0,
+    0, 0, 1, 0, -warmthOffset,
+    0, 0, 0, 1, 0
+  ];
+  
+  // 曝光矩阵
+  const exposureMatrix: number[] = [
+    exposure, 0, 0, 0, 0,
+    0, exposure, 0, 0, 0,
+    0, 0, exposure, 0, 0,
+    0, 0, 0, 1, 0
+  ];
+  
+  // 伽马矩阵 (使用对比度调整来近似伽马校正效果)
+  // gamma: 0.01 to 2, 1.0 = 正常
+  // gamma < 1.0: 提亮中间调, gamma > 1.0: 压暗中间调
+  const gammaContrast = Math.pow(gamma, 0.5); // 使用平方根来平滑效果
+  const gammaOffset = (1 - gammaContrast) * 0.5; // 补偿亮度偏移
+  const gammaMatrix: number[] = [
+    gammaContrast, 0, 0, 0, gammaOffset,
+    0, gammaContrast, 0, 0, gammaOffset,
+    0, 0, gammaContrast, 0, gammaOffset,
+    0, 0, 0, 1, 0
+  ];
+  
+  // 组合所有矩阵 (乘法顺序很重要)
+  let result = multiplyMatrices(exposureMatrix, baseMatrix);
+  result = multiplyMatrices(result, satMatrix);
+  result = multiplyMatrices(result, hueMatrix);
+  result = multiplyMatrices(result, warmthMatrix);
+  result = multiplyMatrices(result, gammaMatrix);
+  
+  // 确保所有值都是有效的数字
+  for (let i = 0; i < result.length; i++) {
+    if (isNaN(result[i]) || !isFinite(result[i])) {
+      result[i] = ORIGINAL_MATRIX[i];
+    }
+    // 限制在合理范围内
+    result[i] = clamp(result[i], -10, 10);
+  }
+  
+  return result;
+}
+
+/**
+ * Multiply two 5x4 color matrices
+ */
+function multiplyMatrices(a: number[], b: number[]): number[] {
+  const result: number[] = new Array(20).fill(0);
+  
+  // 5x4 matrix multiplication
+  // Each row of a times each column of b
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 5; col++) {
+      if (col < 4) {
+        // 4x4 part
+        for (let k = 0; k < 4; k++) {
+          result[row * 5 + col] += a[row * 5 + k] * b[k * 5 + col];
+        }
+      } else {
+        // Translation part (last column)
+        for (let k = 0; k < 4; k++) {
+          result[row * 5 + 4] += a[row * 5 + k] * b[k * 5 + 4];
+        }
+        result[row * 5 + 4] += a[row * 5 + 4];
+      }
+    }
+  }
+  
+  // Last row (alpha) stays unchanged
+  result[16] = 0;
+  result[17] = 0;
+  result[18] = 0;
+  result[19] = 1;
+  
+  return result;
+}
+
+/**
+ * Parameter slider configuration
+ */
+export interface ParamSliderConfig {
+  key: keyof AdjustParams;
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  unit: string;
+}
+
+/**
+ * All parameter slider configurations
+ */
+export const PARAM_SLIDERS: ParamSliderConfig[] = [
+  { key: 'brightness', label: '亮度', min: 0, max: 200, step: 1, unit: '' },
+  { key: 'contrast', label: '对比度', min: 0, max: 200, step: 1, unit: '' },
+  { key: 'saturation', label: '饱和度', min: 0, max: 200, step: 1, unit: '' },
+  { key: 'hue', label: '色相', min: 0, max: 360, step: 1, unit: '°' },
+  { key: 'warmth', label: '色温', min: 0, max: 200, step: 1, unit: '' },
+  { key: 'exposure', label: '曝光', min: 0, max: 200, step: 1, unit: '' },
+  { key: 'gamma', label: '伽马', min: 0, max: 200, step: 1, unit: '' }
+];
+// [End AdjustParams]
+
 // [Start ORIGINAL_MATRIX]
 /**
  * Original color matrix

@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "imagefilter"
+    },
+    {
+      "name": "permission_read_image_reason",
+      "value": "用于选择和编辑本地图片"
     }
   ]
 }

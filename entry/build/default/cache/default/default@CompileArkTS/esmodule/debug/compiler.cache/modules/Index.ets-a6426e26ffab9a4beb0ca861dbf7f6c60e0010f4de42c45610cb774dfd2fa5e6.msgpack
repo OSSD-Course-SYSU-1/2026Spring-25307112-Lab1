@@ -1,4 +1,4 @@
-Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚ0+if (!("finalizeConstruction" in ViewPU.prototype)) {
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚŒäif (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 /*
@@ -15,35 +15,123 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { CAROUSEL_DATA_SOURCE, FILTER_OPTIONS, ORIGINAL_MATRIX } from '../constants/CommonConstants';
+import { CAROUSEL_DATA_SOURCE, FILTER_OPTIONS, ORIGINAL_MATRIX, DEFAULT_ADJUST_PARAMS, generateAdjustMatrix } from '../constants/CommonConstants';
+import { AdjustPanel } from '../components/AdjustPanel';
+import { ImagePickerUtil } from '../utils/ImagePickerUtil';
 class Index extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
+        this.context = getContext(this);
         this.__currentSwiperIndex = new ObservedPropertySimplePU(0, this, "currentSwiperIndex");
+        this.__imageList = new ObservedPropertyObjectPU([], this, "imageList");
         this.__imageFilterTags = new ObservedPropertyObjectPU([], this, "imageFilterTags");
+        this.__imageAdjustParams = new ObservedPropertyObjectPU([], this, "imageAdjustParams");
+        this.__editMode = new ObservedPropertySimplePU('preset', this, "editMode");
+        this.__currentBrightness = new ObservedPropertySimplePU(DEFAULT_ADJUST_PARAMS.brightness, this, "currentBrightness");
+        this.__currentContrast = new ObservedPropertySimplePU(DEFAULT_ADJUST_PARAMS.contrast, this, "currentContrast");
+        this.__currentSaturation = new ObservedPropertySimplePU(DEFAULT_ADJUST_PARAMS.saturation, this, "currentSaturation");
+        this.__currentHue = new ObservedPropertySimplePU(DEFAULT_ADJUST_PARAMS.hue, this, "currentHue");
+        this.__currentWarmth = new ObservedPropertySimplePU(DEFAULT_ADJUST_PARAMS.warmth, this, "currentWarmth");
+        this.__currentExposure = new ObservedPropertySimplePU(DEFAULT_ADJUST_PARAMS.exposure, this, "currentExposure");
+        this.__currentGamma = new ObservedPropertySimplePU(DEFAULT_ADJUST_PARAMS.gamma, this, "currentGamma");
+        this.__scrollOffset = new ObservedPropertySimplePU(0, this, "scrollOffset");
+        this.MAX_IMAGE_HEIGHT = 320;
+        this.MIN_IMAGE_HEIGHT = 160;
+        this.IMAGE_SHRINK_RANGE = 160;
+        this.scroller = new Scroller();
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
+        if (params.context !== undefined) {
+            this.context = params.context;
+        }
         if (params.currentSwiperIndex !== undefined) {
             this.currentSwiperIndex = params.currentSwiperIndex;
         }
+        if (params.imageList !== undefined) {
+            this.imageList = params.imageList;
+        }
         if (params.imageFilterTags !== undefined) {
             this.imageFilterTags = params.imageFilterTags;
+        }
+        if (params.imageAdjustParams !== undefined) {
+            this.imageAdjustParams = params.imageAdjustParams;
+        }
+        if (params.editMode !== undefined) {
+            this.editMode = params.editMode;
+        }
+        if (params.currentBrightness !== undefined) {
+            this.currentBrightness = params.currentBrightness;
+        }
+        if (params.currentContrast !== undefined) {
+            this.currentContrast = params.currentContrast;
+        }
+        if (params.currentSaturation !== undefined) {
+            this.currentSaturation = params.currentSaturation;
+        }
+        if (params.currentHue !== undefined) {
+            this.currentHue = params.currentHue;
+        }
+        if (params.currentWarmth !== undefined) {
+            this.currentWarmth = params.currentWarmth;
+        }
+        if (params.currentExposure !== undefined) {
+            this.currentExposure = params.currentExposure;
+        }
+        if (params.currentGamma !== undefined) {
+            this.currentGamma = params.currentGamma;
+        }
+        if (params.scrollOffset !== undefined) {
+            this.scrollOffset = params.scrollOffset;
+        }
+        if (params.MAX_IMAGE_HEIGHT !== undefined) {
+            this.MAX_IMAGE_HEIGHT = params.MAX_IMAGE_HEIGHT;
+        }
+        if (params.MIN_IMAGE_HEIGHT !== undefined) {
+            this.MIN_IMAGE_HEIGHT = params.MIN_IMAGE_HEIGHT;
+        }
+        if (params.IMAGE_SHRINK_RANGE !== undefined) {
+            this.IMAGE_SHRINK_RANGE = params.IMAGE_SHRINK_RANGE;
+        }
+        if (params.scroller !== undefined) {
+            this.scroller = params.scroller;
         }
     }
     updateStateVars(params) {
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.__currentSwiperIndex.purgeDependencyOnElmtId(rmElmtId);
+        this.__imageList.purgeDependencyOnElmtId(rmElmtId);
         this.__imageFilterTags.purgeDependencyOnElmtId(rmElmtId);
+        this.__imageAdjustParams.purgeDependencyOnElmtId(rmElmtId);
+        this.__editMode.purgeDependencyOnElmtId(rmElmtId);
+        this.__currentBrightness.purgeDependencyOnElmtId(rmElmtId);
+        this.__currentContrast.purgeDependencyOnElmtId(rmElmtId);
+        this.__currentSaturation.purgeDependencyOnElmtId(rmElmtId);
+        this.__currentHue.purgeDependencyOnElmtId(rmElmtId);
+        this.__currentWarmth.purgeDependencyOnElmtId(rmElmtId);
+        this.__currentExposure.purgeDependencyOnElmtId(rmElmtId);
+        this.__currentGamma.purgeDependencyOnElmtId(rmElmtId);
+        this.__scrollOffset.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.__currentSwiperIndex.aboutToBeDeleted();
+        this.__imageList.aboutToBeDeleted();
         this.__imageFilterTags.aboutToBeDeleted();
+        this.__imageAdjustParams.aboutToBeDeleted();
+        this.__editMode.aboutToBeDeleted();
+        this.__currentBrightness.aboutToBeDeleted();
+        this.__currentContrast.aboutToBeDeleted();
+        this.__currentSaturation.aboutToBeDeleted();
+        this.__currentHue.aboutToBeDeleted();
+        this.__currentWarmth.aboutToBeDeleted();
+        this.__currentExposure.aboutToBeDeleted();
+        this.__currentGamma.aboutToBeDeleted();
+        this.__scrollOffset.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -53,47 +141,349 @@ class Index extends ViewPU {
     set currentSwiperIndex(newValue) {
         this.__currentSwiperIndex.set(newValue);
     }
+    get imageList() {
+        return this.__imageList.get();
+    }
+    set imageList(newValue) {
+        this.__imageList.set(newValue);
+    }
     get imageFilterTags() {
         return this.__imageFilterTags.get();
     }
     set imageFilterTags(newValue) {
         this.__imageFilterTags.set(newValue);
     }
+    get imageAdjustParams() {
+        return this.__imageAdjustParams.get();
+    }
+    set imageAdjustParams(newValue) {
+        this.__imageAdjustParams.set(newValue);
+    }
+    get editMode() {
+        return this.__editMode.get();
+    }
+    set editMode(newValue) {
+        this.__editMode.set(newValue);
+    }
+    get currentBrightness() {
+        return this.__currentBrightness.get();
+    }
+    set currentBrightness(newValue) {
+        this.__currentBrightness.set(newValue);
+    }
+    get currentContrast() {
+        return this.__currentContrast.get();
+    }
+    set currentContrast(newValue) {
+        this.__currentContrast.set(newValue);
+    }
+    get currentSaturation() {
+        return this.__currentSaturation.get();
+    }
+    set currentSaturation(newValue) {
+        this.__currentSaturation.set(newValue);
+    }
+    get currentHue() {
+        return this.__currentHue.get();
+    }
+    set currentHue(newValue) {
+        this.__currentHue.set(newValue);
+    }
+    get currentWarmth() {
+        return this.__currentWarmth.get();
+    }
+    set currentWarmth(newValue) {
+        this.__currentWarmth.set(newValue);
+    }
+    get currentExposure() {
+        return this.__currentExposure.get();
+    }
+    set currentExposure(newValue) {
+        this.__currentExposure.set(newValue);
+    }
+    get currentGamma() {
+        return this.__currentGamma.get();
+    }
+    set currentGamma(newValue) {
+        this.__currentGamma.set(newValue);
+    }
+    get scrollOffset() {
+        return this.__scrollOffset.get();
+    }
+    set scrollOffset(newValue) {
+        this.__scrollOffset.set(newValue);
+    }
     // [Start aboutToAppear]
     aboutToAppear() {
+        // Initialize with default images from resources
+        this.imageList = [...CAROUSEL_DATA_SOURCE];
         // Initialize all images to 'original' filter.
-        this.imageFilterTags = new Array(CAROUSEL_DATA_SOURCE.length).fill('original');
+        this.imageFilterTags = new Array(this.imageList.length).fill('original');
+        // Initialize all images with default adjustment parameters
+        this.initAdjustParams();
     }
     // [End aboutToAppear]
+    // Initialize adjustment parameters array
+    initAdjustParams() {
+        const defaultParams = {
+            brightness: DEFAULT_ADJUST_PARAMS.brightness,
+            contrast: DEFAULT_ADJUST_PARAMS.contrast,
+            saturation: DEFAULT_ADJUST_PARAMS.saturation,
+            hue: DEFAULT_ADJUST_PARAMS.hue,
+            warmth: DEFAULT_ADJUST_PARAMS.warmth,
+            exposure: DEFAULT_ADJUST_PARAMS.exposure,
+            gamma: DEFAULT_ADJUST_PARAMS.gamma
+        };
+        this.imageAdjustParams = [];
+        for (let i = 0; i < this.imageList.length; i++) {
+            this.imageAdjustParams.push({
+                brightness: defaultParams.brightness,
+                contrast: defaultParams.contrast,
+                saturation: defaultParams.saturation,
+                hue: defaultParams.hue,
+                warmth: defaultParams.warmth,
+                exposure: defaultParams.exposure,
+                gamma: defaultParams.gamma
+            });
+        }
+        // Sync current params from first image
+        this.syncCurrentParams();
+    }
+    // Sync current params from imageAdjustParams array to currentXxx variables
+    syncCurrentParams() {
+        if (this.currentSwiperIndex < this.imageAdjustParams.length) {
+            const params = this.imageAdjustParams[this.currentSwiperIndex];
+            this.currentBrightness = params.brightness;
+            this.currentContrast = params.contrast;
+            this.currentSaturation = params.saturation;
+            this.currentHue = params.hue;
+            this.currentWarmth = params.warmth;
+            this.currentExposure = params.exposure;
+            this.currentGamma = params.gamma;
+        }
+    }
+    // Save current params back to imageAdjustParams array
+    saveCurrentParams() {
+        if (this.currentSwiperIndex < this.imageAdjustParams.length) {
+            this.imageAdjustParams[this.currentSwiperIndex] = {
+                brightness: this.currentBrightness,
+                contrast: this.currentContrast,
+                saturation: this.currentSaturation,
+                hue: this.currentHue,
+                warmth: this.currentWarmth,
+                exposure: this.currentExposure,
+                gamma: this.currentGamma
+            };
+        }
+    }
+    // Calculate dynamic image height based on scroll offset
+    calculateImageHeight() {
+        if (this.scrollOffset <= 0) {
+            return this.MAX_IMAGE_HEIGHT;
+        }
+        // Calculate shrink progress (0 to 1)
+        const shrinkProgress = Math.min(this.scrollOffset / this.IMAGE_SHRINK_RANGE, 1);
+        // Linear interpolation between MAX and MIN
+        const height = this.MAX_IMAGE_HEIGHT - (this.MAX_IMAGE_HEIGHT - this.MIN_IMAGE_HEIGHT) * shrinkProgress;
+        return Math.max(height, this.MIN_IMAGE_HEIGHT);
+    }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Stack.create({ alignContent: Alignment.Top });
+            Stack.height('100%');
+            Stack.width('100%');
+            Stack.backgroundColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Stack.expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM]);
+        }, Stack);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // åº•å±‚ï¼šæ»šåŠ¨å†…å®¹åŒºåŸŸï¼ˆå‚æ•°è°ƒæ•´åŒºåŸŸï¼‰
+            Scroll.create(this.scroller);
+            // åº•å±‚ï¼šæ»šåŠ¨å†…å®¹åŒºåŸŸï¼ˆå‚æ•°è°ƒæ•´åŒºåŸŸï¼‰
+            Scroll.width('100%');
+            // åº•å±‚ï¼šæ»šåŠ¨å†…å®¹åŒºåŸŸï¼ˆå‚æ•°è°ƒæ•´åŒºåŸŸï¼‰
+            Scroll.height('100%');
+            // åº•å±‚ï¼šæ»šåŠ¨å†…å®¹åŒºåŸŸï¼ˆå‚æ•°è°ƒæ•´åŒºåŸŸï¼‰
+            Scroll.scrollBar(BarState.Off);
+            // åº•å±‚ï¼šæ»šåŠ¨å†…å®¹åŒºåŸŸï¼ˆå‚æ•°è°ƒæ•´åŒºåŸŸï¼‰
+            Scroll.edgeEffect(EdgeEffect.Spring);
+            // åº•å±‚ï¼šæ»šåŠ¨å†…å®¹åŒºåŸŸï¼ˆå‚æ•°è°ƒæ•´åŒºåŸŸï¼‰
+            Scroll.onScroll(() => {
+                // Update scroll offset
+                this.scrollOffset = this.scroller.currentOffset().yOffset;
+            });
+            // åº•å±‚ï¼šæ»šåŠ¨å†…å®¹åŒºåŸŸï¼ˆå‚æ•°è°ƒæ•´åŒºåŸŸï¼‰
+            Scroll.onScrollEdge((side) => {
+                // Reset scroll offset when reaching top edge
+                if (side === Edge.Top) {
+                    this.scrollOffset = 0;
+                }
+            });
+        }, Scroll);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.height('100%');
             Column.width('100%');
-            Column.backgroundColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Column.expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM]);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Top Section: Image Carousel (Swiper)
+            // å ä½åŒºåŸŸï¼Œä¸ºé¡¶éƒ¨çš„å›¾ç‰‡åŒºåŸŸç•™å‡ºç©ºé—´
             Column.create();
-            // Top Section: Image Carousel (Swiper)
+            // å ä½åŒºåŸŸï¼Œä¸ºé¡¶éƒ¨çš„å›¾ç‰‡åŒºåŸŸç•™å‡ºç©ºé—´
             Column.width('100%');
-            // Top Section: Image Carousel (Swiper)
-            Column.height('65%');
-            // Top Section: Image Carousel (Swiper)
+            // å ä½åŒºåŸŸï¼Œä¸ºé¡¶éƒ¨çš„å›¾ç‰‡åŒºåŸŸç•™å‡ºç©ºé—´
+            Column.height(this.calculateImageHeight() + 100);
+        }, Column);
+        // å ä½åŒºåŸŸï¼Œä¸ºé¡¶éƒ¨çš„å›¾ç‰‡åŒºåŸŸç•™å‡ºç©ºé—´
+        Column.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // Mode Switch Tabs
+            Row.create();
+            // Mode Switch Tabs
+            Row.width('100%');
+            // Mode Switch Tabs
+            Row.justifyContent(FlexAlign.Center);
+            // Mode Switch Tabs
+            Row.margin({ bottom: 8 });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('é¢„è®¾æ»¤é•œ');
+            Text.fontSize(16);
+            Text.fontWeight(this.editMode === 'preset' ? FontWeight.Bold : FontWeight.Normal);
+            Text.fontColor(this.editMode === 'preset'
+                ? { "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" } : { "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Text.padding({ left: 20, right: 20, top: 8, bottom: 8 });
+            Text.borderRadius(20);
+            Text.backgroundColor(this.editMode === 'preset'
+                ? { "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" } : 'transparent');
+            Text.onClick(() => {
+                this.editMode = 'preset';
+            });
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('å‚æ•°è°ƒæ•´');
+            Text.fontSize(16);
+            Text.fontWeight(this.editMode === 'adjust' ? FontWeight.Bold : FontWeight.Normal);
+            Text.fontColor(this.editMode === 'adjust'
+                ? { "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" } : { "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Text.padding({ left: 20, right: 20, top: 8, bottom: 8 });
+            Text.borderRadius(20);
+            Text.backgroundColor(this.editMode === 'adjust'
+                ? { "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" } : 'transparent');
+            Text.onClick(() => {
+                this.editMode = 'adjust';
+            });
+        }, Text);
+        Text.pop();
+        // Mode Switch Tabs
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // Bottom Section: Control Panel
+            Column.create();
+            // Bottom Section: Control Panel
+            Column.width('100%');
+            // Bottom Section: Control Panel
+            Column.padding({ left: 16, right: 16, bottom: 16 });
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.editMode === 'preset') {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    // Preset Filter Panel
+                    this.PresetFilterPanel.bind(this)();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new 
+                                // Parameter Adjustment Panel - use @Link for two-way binding
+                                AdjustPanel(this, {
+                                    brightnessValue: this.__currentBrightness,
+                                    contrastValue: this.__currentContrast,
+                                    saturationValue: this.__currentSaturation,
+                                    hueValue: this.__currentHue,
+                                    warmthValue: this.__currentWarmth,
+                                    exposureValue: this.__currentExposure,
+                                    gammaValue: this.__currentGamma,
+                                    onReset: () => {
+                                        this.resetCurrentParams();
+                                    }
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 204, col: 15 });
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        brightnessValue: this.currentBrightness,
+                                        contrastValue: this.currentContrast,
+                                        saturationValue: this.currentSaturation,
+                                        hueValue: this.currentHue,
+                                        warmthValue: this.currentWarmth,
+                                        exposureValue: this.currentExposure,
+                                        gammaValue: this.currentGamma,
+                                        onReset: () => {
+                                            this.resetCurrentParams();
+                                        }
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                            }
+                        }, { name: "AdjustPanel" });
+                    }
+                });
+            }
+        }, If);
+        If.pop();
+        // Bottom Section: Control Panel
+        Column.pop();
+        Column.pop();
+        // åº•å±‚ï¼šæ»šåŠ¨å†…å®¹åŒºåŸŸï¼ˆå‚æ•°è°ƒæ•´åŒºåŸŸï¼‰
+        Scroll.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // é¡¶å±‚ï¼šå›ºå®šçš„å›¾ç‰‡åŒºåŸŸï¼ˆå¸é¡¶æ•ˆæœï¼‰
+            Column.create();
+            // é¡¶å±‚ï¼šå›ºå®šçš„å›¾ç‰‡åŒºåŸŸï¼ˆå¸é¡¶æ•ˆæœï¼‰
+            Column.width('100%');
+            // é¡¶å±‚ï¼šå›ºå®šçš„å›¾ç‰‡åŒºåŸŸï¼ˆå¸é¡¶æ•ˆæœï¼‰
+            Column.backgroundColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // Top status bar area
+            Row.create();
+            // Top status bar area
+            Row.width('100%');
+            // Top status bar area
+            Row.height(45);
+            // Top status bar area
+            Row.backgroundColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+        }, Row);
+        // Top status bar area
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // Image Carousel Section
+            Column.create();
+            // Image Carousel Section
+            Column.width('100%');
+            // Image Carousel Section
+            Column.height(this.calculateImageHeight());
+            // Image Carousel Section
             Column.justifyContent(FlexAlign.Center);
-            // Top Section: Image Carousel (Swiper)
+            // Image Carousel Section
             Column.padding({ left: 16, right: 16, top: 8 });
-            // Top Section: Image Carousel (Swiper)
-            Column.margin({ top: 45 });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // [Start swiperUsagePosition]
             Swiper.create();
             // [Start swiperUsagePosition]
             Swiper.onChange((index) => {
+                // Save current params before switching
+                this.saveCurrentParams();
                 // Update global index state when user swipes
                 this.currentSwiperIndex = index;
+                // Sync params from new image
+                this.syncCurrentParams();
             });
             // [Start swiperUsagePosition]
             Swiper.width('100%');
@@ -113,7 +503,7 @@ class Index extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
             const forEachItemGenFunction = (_item, index) => {
-                const imgRes = _item;
+                const imgSource = _item;
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                     // Container needed for individual scale animation
                     Column.create();
@@ -132,7 +522,7 @@ class Index extends ViewPU {
                 }, Column);
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                     // [Start imageUsagePosition]
-                    Image.create(imgRes);
+                    Image.create(imgSource);
                     // [Start imageUsagePosition]
                     Image.width('100%');
                     // [Start imageUsagePosition]
@@ -142,36 +532,81 @@ class Index extends ViewPU {
                     // [Start imageUsagePosition]
                     Image.borderRadius(16);
                     // [Start imageUsagePosition]
-                    Image.colorFilter(this.getFilterByTag(this.imageFilterTags[index]));
+                    Image.colorFilter(this.getCurrentFilter(index));
                 }, Image);
                 // Container needed for individual scale animation
                 Column.pop();
             };
-            this.forEachUpdateFunction(elmtId, CAROUSEL_DATA_SOURCE, forEachItemGenFunction, (item, index) => index + '_' + JSON.stringify(item), true, true);
+            this.forEachUpdateFunction(elmtId, this.imageList, forEachItemGenFunction, (item, index) => index + '_' + (typeof item === 'string' ? item : 'resource'), true, true);
         }, ForEach);
         ForEach.pop();
         // [Start swiperUsagePosition]
         Swiper.pop();
-        // Top Section: Image Carousel (Swiper)
+        // Image Carousel Section
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Bottom Section: Control Panel (Radios)
-            Column.create();
-            // Bottom Section: Control Panel (Radios)
-            Column.layoutWeight(1);
-            // Bottom Section: Control Panel (Radios)
-            Column.padding(24);
-            // Bottom Section: Control Panel (Radios)
-            Column.backgroundColor({ "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            // Bottom Section: Control Panel (Radios)
-            Column.borderRadius(16);
-            // Bottom Section: Control Panel (Radios)
-            Column.margin({
-                left: 16,
-                right: 16,
-                top: 36,
-                bottom: 16
+            // Image counter and add button
+            Row.create();
+            // Image counter and add button
+            Row.width('100%');
+            // Image counter and add button
+            Row.padding({ left: 16, right: 16 });
+            // Image counter and add button
+            Row.margin({ top: 8, bottom: 8 });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(`å›¾ç‰‡ ${this.currentSwiperIndex + 1} / ${this.imageList.length}`);
+            Text.fontSize(14);
+            Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Blank.create();
+        }, Blank);
+        Blank.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithChild({ type: ButtonType.Normal });
+            Button.backgroundColor({ "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Button.borderRadius(20);
+            Button.height(36);
+            Button.padding({ left: 16, right: 16 });
+            Button.onClick(() => {
+                this.pickImages();
             });
+        }, Button);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('+');
+            Text.fontSize(18);
+            Text.fontColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('æ·»åŠ å›¾ç‰‡');
+            Text.fontSize(14);
+            Text.fontColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Text.margin({ left: 4 });
+        }, Text);
+        Text.pop();
+        Row.pop();
+        Button.pop();
+        // Image counter and add button
+        Row.pop();
+        // é¡¶å±‚ï¼šå›ºå®šçš„å›¾ç‰‡åŒºåŸŸï¼ˆå¸é¡¶æ•ˆæœï¼‰
+        Column.pop();
+        Stack.pop();
+    }
+    // Preset Filter Panel Builder
+    PresetFilterPanel(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.width('100%');
+            Column.height('100%');
+            Column.padding(24);
+            Column.backgroundColor({ "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Column.borderRadius(16);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create("Apply Filter");
@@ -193,6 +628,12 @@ class Index extends ViewPU {
             Grid.columnsGap(10);
             // [Start radioUsagePosition]
             Grid.width('100%');
+            // [Start radioUsagePosition]
+            Grid.layoutWeight(1);
+            // [Start radioUsagePosition]
+            Grid.scrollBar(BarState.Off);
+            // [Start radioUsagePosition]
+            Grid.edgeEffect(EdgeEffect.Spring);
         }, Grid);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
@@ -238,9 +679,74 @@ class Index extends ViewPU {
         ForEach.pop();
         // [Start radioUsagePosition]
         Grid.pop();
-        // Bottom Section: Control Panel (Radios)
         Column.pop();
-        Column.pop();
+    }
+    // Pick images from gallery
+    async pickImages() {
+        const uris = await ImagePickerUtil.pickImages(this.context, 10);
+        if (uris.length > 0) {
+            // Add new images to the list
+            for (let i = 0; i < uris.length; i++) {
+                this.imageList.push(uris[i]);
+                this.imageFilterTags.push('original');
+                this.imageAdjustParams.push({
+                    brightness: DEFAULT_ADJUST_PARAMS.brightness,
+                    contrast: DEFAULT_ADJUST_PARAMS.contrast,
+                    saturation: DEFAULT_ADJUST_PARAMS.saturation,
+                    hue: DEFAULT_ADJUST_PARAMS.hue,
+                    warmth: DEFAULT_ADJUST_PARAMS.warmth,
+                    exposure: DEFAULT_ADJUST_PARAMS.exposure,
+                    gamma: DEFAULT_ADJUST_PARAMS.gamma
+                });
+            }
+        }
+    }
+    // Reset current image parameters to default (triggers reactive update)
+    resetCurrentParams() {
+        const currentIndex = this.currentSwiperIndex;
+        // Reset to default values
+        const defaultParams = {
+            brightness: DEFAULT_ADJUST_PARAMS.brightness,
+            contrast: DEFAULT_ADJUST_PARAMS.contrast,
+            saturation: DEFAULT_ADJUST_PARAMS.saturation,
+            hue: DEFAULT_ADJUST_PARAMS.hue,
+            warmth: DEFAULT_ADJUST_PARAMS.warmth,
+            exposure: DEFAULT_ADJUST_PARAMS.exposure,
+            gamma: DEFAULT_ADJUST_PARAMS.gamma
+        };
+        // Update imageAdjustParams array
+        this.imageAdjustParams[currentIndex] = defaultParams;
+        // Update currentXxx variables for @Link binding (this will update sliders)
+        this.currentBrightness = defaultParams.brightness;
+        this.currentContrast = defaultParams.contrast;
+        this.currentSaturation = defaultParams.saturation;
+        this.currentHue = defaultParams.hue;
+        this.currentWarmth = defaultParams.warmth;
+        this.currentExposure = defaultParams.exposure;
+        this.currentGamma = defaultParams.gamma;
+    }
+    // Get current filter based on edit mode
+    getCurrentFilter(index) {
+        if (this.editMode === 'preset') {
+            return this.getFilterByTag(this.imageFilterTags[index]);
+        }
+        else {
+            // For current image, use currentXxx variables (for real-time preview)
+            if (index === this.currentSwiperIndex) {
+                return generateAdjustMatrix({
+                    brightness: this.currentBrightness,
+                    contrast: this.currentContrast,
+                    saturation: this.currentSaturation,
+                    hue: this.currentHue,
+                    warmth: this.currentWarmth,
+                    exposure: this.currentExposure,
+                    gamma: this.currentGamma
+                });
+            }
+            else {
+                return generateAdjustMatrix(this.imageAdjustParams[index]);
+            }
+        }
     }
     // [Start getFilterByTagFunc]
     // Helper: Retrieves the actual filter object based on the tag string
@@ -256,7 +762,7 @@ class Index extends ViewPU {
     }
 }
 registerNamedRoute(() => new Index(undefined, {}), "", { bundleName: "com.example.imagefilter", moduleName: "entry", pagePath: "pages/Index", pageFullPath: "entry/src/main/ets/pages/Index", integratedHsp: "false", moduleType: "followWithHap" });
-//# sourceMappingURL=Index.js.mapÂ‘Ù_D:\DevEcoStudio\Projects\image-filter-master-3\entry\src\main\ets\constants\CommonConstants.etsÙQD:\DevEcoStudio\Projects\image-filter-master-3\entry\src\main\ets\pages\Index.etsÔrB›ªmoduleName±isLocalDependency¯isNodeEntryFile§pkgPath±belongProjectPath§pkgNameªpkgVersion±dependencyPkgInfo°belongModulePath§checker¬shouldEmitJs¥entryÃÂÙ4D:\DevEcoStudio\Projects\image-filter-master-3\entryÙ.D:\DevEcoStudio\Projects\image-filter-master-3¥entry¥1.0.0Ô  Ù4D:\DevEcoStudio\Projects\image-filter-master-3\entryÔrCÜ ®¬getNodeCount²getIdentifierCount®getSymbolCount¬getTypeCountµgetInstantiationCountµgetRelationCacheSizes±isUndefinedSymbol±isArgumentsSymbol¯isUnknownSymbol¯getMergedSymbol®getDiagnostics´getGlobalDiagnostics´getRecursionIdentity¶getUnmatchedProperties¹getTypeOfSymbolAtLocation¯getTypeOfSymbolÙ(getSymbolsOfParameterPropertyDeclaration·getDeclaredTypeOfSymbol³getPropertiesOfType±getPropertyOfTypeÙ"getPrivateIdentifierPropertyOfType·getTypeOfPropertyOfType²getIndexInfoOfType³getIndexInfosOfTypeºgetIndexInfosOfIndexSymbol³getSignaturesOfType²getIndexTypeOfType¬getIndexType¬getBaseTypes¸getBaseTypeOfLiteralType®getWidenedType³getTypeFromTypeNode°getParameterTypeÙ$getParameterIdentifierNameAtPosition¸getPromisedTypeOfPromise®getAwaitedType¸getReturnTypeOfSignature®isNullableType¯getNullableType²getNonNullableType²getNonOptionalType°getTypeArguments®typeToTypeNodeÙ$indexInfoToIndexSignatureDeclaration¿signatureToSignatureDeclaration²symbolToEntityName²symbolToExpression¬symbolToNodeÙ!symbolToTypeParameterDeclarations¼symbolToParameterDeclarationºtypeParameterToDeclaration±getSymbolsInScope³getSymbolAtLocation·getIndexInfosAtLocationÙ!getShorthandAssignmentValueSymbolÙ#getExportSpecifierLocalTargetSymbol·getExportSymbolOfSymbol±getTypeAtLocationºgetTypeAtLocationForLinterÙ tryGetTypeAtLocationWithoutCheckºgetTypeOfAssignmentPatternÙ*getPropertySymbolOfDestructuringAssignment±signatureToString¬typeToString®symbolToStringµtypePredicateToString®writeSignature©writeType«writeSymbol²writeTypePredicate¼getAugmentedPropertiesOfType®getRootSymbols²getSymbolOfExpando±getContextualTypeÙ(getContextualTypeForObjectLiteralElementÙ#getContextualTypeForArgumentAtIndexÙ getContextualTypeForJsxAttribute²isContextSensitiveÙ!getTypeOfPropertyOfContextualTypeµgetFullyQualifiedNameÙ#tryGetResolvedSignatureWithoutCheck´getResolvedSignatureÙ/getResolvedSignatureForStringLiteralCompletionsÙ$getResolvedSignatureForSignatureHelpµgetExpandedParameters¹hasEffectiveRestParameterºcontainsArgumentsReference°getConstantValueµisValidPropertyAccessÙ#isValidPropertyAccessForCompletions»getSignatureFromDeclarationºisImplementationOfOverload¹getImmediateAliasedSymbol°getAliasedSymbol¯getEmitResolver²getExportsOfModule¿getExportsAndPropertiesOfModuleÙ forEachExportAndPropertyOfModule¯getSymbolWalker±getAmbientModules¹getJsxIntrinsicTagNamesAt³isOptionalParameter»tryGetMemberInModuleExportsÙ(tryGetMemberInModuleExportsAndProperties´tryFindAmbientModuleÙ(tryFindAmbientModuleWithoutAugmentations¯getApparentType¬getUnionType²isTypeAssignableTo³createAnonymousType¯createSignature¬createSymbol¯createIndexInfoªgetAnyType­getStringType­getNumberType±createPromiseType¯createArrayType¹getElementTypeOfArrayType®getBooleanType¬getFalseType«getTrueType«getVoidType°getUndefinedType«getNullType¯getESSymbolType¬getNeverType¯getOptionalType®getPromiseType²getPromiseLikeType´getAsyncIterableType²isSymbolAccessible«isArrayType«isTupleType¯isArrayLikeTypeÙ#isTypeInvalidDueToUnionDiscriminantºgetExactOptionalProperties¿getAllPossiblePropertiesOfTypesÙ(getSuggestedSymbolForNonexistentPropertyÙ#getSuggestionForNonexistentPropertyÙ,getSuggestedSymbolForNonexistentJSXAttributeÙ&getSuggestedSymbolForNonexistentSymbolÙ!getSuggestionForNonexistentSymbolÙ&getSuggestedSymbolForNonexistentModuleÙ!getSuggestionForNonexistentExportÙ+getSuggestedSymbolForNonexistentClassMember·getBaseConstraintOfType»getDefaultFromTypeParameter«resolveName¯getJsxNamespaceµgetJsxFragmentFactory¸getAccessibleSymbolChain»getTypePredicateOfSignature¹resolveExternalModuleName»resolveExternalModuleSymbol°tryGetThisTypeAt¹getTypeArgumentConstraint¸getSuggestionDiagnostics¸runWithCancellationTokenÙ3getLocalTypeParametersOfClassOrInterfaceOrTypeAlias´isDeclarationVisible´isPropertyAccessible»getTypeOnlyAliasDeclaration¿getMemberOverrideModifierStatusÙ!isTypeParameterPossiblyReferenced²getConstEnumRelate´clearConstEnumRelateµdeleteConstEnumRelateÙ$getTypeArgumentsForResolvedSignatureµgetCheckedSourceFilesÙ"collectHaveTsNoCheckFilesForLinter·clearQualifiedNameCache®isStaticRecord²isStaticSourceFileÔ  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  ÃÃÚk/*
+//# sourceMappingURL=Index.js.mapÂ“Ù_D:\DevEcoStudio\Projects\image-filter-master-3\entry\src\main\ets\constants\CommonConstants.etsÙ\D:\DevEcoStudio\Projects\image-filter-master-3\entry\src\main\ets\components\AdjustPanel.etsÙ[D:\DevEcoStudio\Projects\image-filter-master-3\entry\src\main\ets\utils\ImagePickerUtil.etsÙQD:\DevEcoStudio\Projects\image-filter-master-3\entry\src\main\ets\pages\Index.etsÔrB›ªmoduleName±isLocalDependency¯isNodeEntryFile§pkgPath±belongProjectPath§pkgNameªpkgVersion±dependencyPkgInfo°belongModulePath§checker¬shouldEmitJs¥entryÃÂÙ4D:\DevEcoStudio\Projects\image-filter-master-3\entryÙ.D:\DevEcoStudio\Projects\image-filter-master-3¥entry¥1.0.0Ô  Ù4D:\DevEcoStudio\Projects\image-filter-master-3\entryÔrCÜ ®¬getNodeCount²getIdentifierCount®getSymbolCount¬getTypeCountµgetInstantiationCountµgetRelationCacheSizes±isUndefinedSymbol±isArgumentsSymbol¯isUnknownSymbol¯getMergedSymbol®getDiagnostics´getGlobalDiagnostics´getRecursionIdentity¶getUnmatchedProperties¹getTypeOfSymbolAtLocation¯getTypeOfSymbolÙ(getSymbolsOfParameterPropertyDeclaration·getDeclaredTypeOfSymbol³getPropertiesOfType±getPropertyOfTypeÙ"getPrivateIdentifierPropertyOfType·getTypeOfPropertyOfType²getIndexInfoOfType³getIndexInfosOfTypeºgetIndexInfosOfIndexSymbol³getSignaturesOfType²getIndexTypeOfType¬getIndexType¬getBaseTypes¸getBaseTypeOfLiteralType®getWidenedType³getTypeFromTypeNode°getParameterTypeÙ$getParameterIdentifierNameAtPosition¸getPromisedTypeOfPromise®getAwaitedType¸getReturnTypeOfSignature®isNullableType¯getNullableType²getNonNullableType²getNonOptionalType°getTypeArguments®typeToTypeNodeÙ$indexInfoToIndexSignatureDeclaration¿signatureToSignatureDeclaration²symbolToEntityName²symbolToExpression¬symbolToNodeÙ!symbolToTypeParameterDeclarations¼symbolToParameterDeclarationºtypeParameterToDeclaration±getSymbolsInScope³getSymbolAtLocation·getIndexInfosAtLocationÙ!getShorthandAssignmentValueSymbolÙ#getExportSpecifierLocalTargetSymbol·getExportSymbolOfSymbol±getTypeAtLocationºgetTypeAtLocationForLinterÙ tryGetTypeAtLocationWithoutCheckºgetTypeOfAssignmentPatternÙ*getPropertySymbolOfDestructuringAssignment±signatureToString¬typeToString®symbolToStringµtypePredicateToString®writeSignature©writeType«writeSymbol²writeTypePredicate¼getAugmentedPropertiesOfType®getRootSymbols²getSymbolOfExpando±getContextualTypeÙ(getContextualTypeForObjectLiteralElementÙ#getContextualTypeForArgumentAtIndexÙ getContextualTypeForJsxAttribute²isContextSensitiveÙ!getTypeOfPropertyOfContextualTypeµgetFullyQualifiedNameÙ#tryGetResolvedSignatureWithoutCheck´getResolvedSignatureÙ/getResolvedSignatureForStringLiteralCompletionsÙ$getResolvedSignatureForSignatureHelpµgetExpandedParameters¹hasEffectiveRestParameterºcontainsArgumentsReference°getConstantValueµisValidPropertyAccessÙ#isValidPropertyAccessForCompletions»getSignatureFromDeclarationºisImplementationOfOverload¹getImmediateAliasedSymbol°getAliasedSymbol¯getEmitResolver²getExportsOfModule¿getExportsAndPropertiesOfModuleÙ forEachExportAndPropertyOfModule¯getSymbolWalker±getAmbientModules¹getJsxIntrinsicTagNamesAt³isOptionalParameter»tryGetMemberInModuleExportsÙ(tryGetMemberInModuleExportsAndProperties´tryFindAmbientModuleÙ(tryFindAmbientModuleWithoutAugmentations¯getApparentType¬getUnionType²isTypeAssignableTo³createAnonymousType¯createSignature¬createSymbol¯createIndexInfoªgetAnyType­getStringType­getNumberType±createPromiseType¯createArrayType¹getElementTypeOfArrayType®getBooleanType¬getFalseType«getTrueType«getVoidType°getUndefinedType«getNullType¯getESSymbolType¬getNeverType¯getOptionalType®getPromiseType²getPromiseLikeType´getAsyncIterableType²isSymbolAccessible«isArrayType«isTupleType¯isArrayLikeTypeÙ#isTypeInvalidDueToUnionDiscriminantºgetExactOptionalProperties¿getAllPossiblePropertiesOfTypesÙ(getSuggestedSymbolForNonexistentPropertyÙ#getSuggestionForNonexistentPropertyÙ,getSuggestedSymbolForNonexistentJSXAttributeÙ&getSuggestedSymbolForNonexistentSymbolÙ!getSuggestionForNonexistentSymbolÙ&getSuggestedSymbolForNonexistentModuleÙ!getSuggestionForNonexistentExportÙ+getSuggestedSymbolForNonexistentClassMember·getBaseConstraintOfType»getDefaultFromTypeParameter«resolveName¯getJsxNamespaceµgetJsxFragmentFactory¸getAccessibleSymbolChain»getTypePredicateOfSignature¹resolveExternalModuleName»resolveExternalModuleSymbol°tryGetThisTypeAt¹getTypeArgumentConstraint¸getSuggestionDiagnostics¸runWithCancellationTokenÙ3getLocalTypeParametersOfClassOrInterfaceOrTypeAlias´isDeclarationVisible´isPropertyAccessible»getTypeOnlyAliasDeclaration¿getMemberOverrideModifierStatusÙ!isTypeParameterPossiblyReferenced²getConstEnumRelate´clearConstEnumRelateµdeleteConstEnumRelateÙ$getTypeArgumentsForResolvedSignatureµgetCheckedSourceFilesÙ"collectHaveTsNoCheckFilesForLinter·clearQualifiedNameCache®isStaticRecord²isStaticSourceFileÔ  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  Ô  ÃÃÚBã/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License,Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -271,129 +777,446 @@ registerNamedRoute(() => new Index(undefined, {}), "", { bundleName: "com.exampl
  * limitations under the License.
  */
 
-import { CAROUSEL_DATA_SOURCE, FILTER_OPTIONS, FilterOption, ORIGINAL_MATRIX } from '../constants/CommonConstants';
+import { 
+  CAROUSEL_DATA_SOURCE, 
+  FILTER_OPTIONS, 
+  FilterOption, 
+  ORIGINAL_MATRIX,
+  AdjustParams,
+  DEFAULT_ADJUST_PARAMS,
+  generateAdjustMatrix
+} from '../constants/CommonConstants';
+import { AdjustPanel } from '../components/AdjustPanel';
+import { ImagePickerUtil } from '../utils/ImagePickerUtil';
+import { common } from '@kit.AbilityKit';
+
+// Edit mode type
+type EditMode = 'preset' | 'adjust';
+
+// Image source type - can be Resource or file URI string
+type ImageSource = Resource | string;
 
 @Entry
 @Component
 struct Index {
+  // Get context for image picker
+  private context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
+  
   // Tracks the current index of the Swiper
   @State currentSwiperIndex: number = 0;
-  // Stores the filter "tag" (value) for EACH image independently.
+  // Dynamic image list - supports both Resource and URI
+  @State imageList: Array<ImageSource> = [];
+  // Stores the filter "tag" (value) for EACH image independently (preset mode)
   @State imageFilterTags: Array<string> = [];
+  // Stores the adjustment parameters for EACH image independently (adjust mode)
+  @State imageAdjustParams: Array<AdjustParams> = [];
+  // Current edit mode: preset filters or parameter adjustment
+  @State editMode: EditMode = 'preset';
+  
+  // Current image adjustment parameters (for @Link binding with AdjustPanel)
+  @State currentBrightness: number = DEFAULT_ADJUST_PARAMS.brightness;
+  @State currentContrast: number = DEFAULT_ADJUST_PARAMS.contrast;
+  @State currentSaturation: number = DEFAULT_ADJUST_PARAMS.saturation;
+  @State currentHue: number = DEFAULT_ADJUST_PARAMS.hue;
+  @State currentWarmth: number = DEFAULT_ADJUST_PARAMS.warmth;
+  @State currentExposure: number = DEFAULT_ADJUST_PARAMS.exposure;
+  @State currentGamma: number = DEFAULT_ADJUST_PARAMS.gamma;
+  
+  // Scroll related states for sticky image effect
+  @State scrollOffset: number = 0;
+  
+  // Image height constraints
+  private readonly MAX_IMAGE_HEIGHT: number = 320; // Maximum image height
+  private readonly MIN_IMAGE_HEIGHT: number = 160; // Minimum image height when sticky
+  private readonly IMAGE_SHRINK_RANGE: number = 160; // Range for image to shrink (MAX - MIN)
+  
+  // Scroller controller
+  private scroller: Scroller = new Scroller();
 
   // [Start aboutToAppear]
   aboutToAppear(): void {
+    // Initialize with default images from resources
+    this.imageList = [...CAROUSEL_DATA_SOURCE];
     // Initialize all images to 'original' filter.
-    this.imageFilterTags = new Array<string>(CAROUSEL_DATA_SOURCE.length).fill('original');
+    this.imageFilterTags = new Array<string>(this.imageList.length).fill('original');
+    // Initialize all images with default adjustment parameters
+    this.initAdjustParams();
   }
   // [End aboutToAppear]
 
+  // Initialize adjustment parameters array
+  private initAdjustParams(): void {
+    const defaultParams: AdjustParams = {
+      brightness: DEFAULT_ADJUST_PARAMS.brightness,
+      contrast: DEFAULT_ADJUST_PARAMS.contrast,
+      saturation: DEFAULT_ADJUST_PARAMS.saturation,
+      hue: DEFAULT_ADJUST_PARAMS.hue,
+      warmth: DEFAULT_ADJUST_PARAMS.warmth,
+      exposure: DEFAULT_ADJUST_PARAMS.exposure,
+      gamma: DEFAULT_ADJUST_PARAMS.gamma
+    };
+    this.imageAdjustParams = [];
+    for (let i = 0; i < this.imageList.length; i++) {
+      this.imageAdjustParams.push({
+        brightness: defaultParams.brightness,
+        contrast: defaultParams.contrast,
+        saturation: defaultParams.saturation,
+        hue: defaultParams.hue,
+        warmth: defaultParams.warmth,
+        exposure: defaultParams.exposure,
+        gamma: defaultParams.gamma
+      });
+    }
+    // Sync current params from first image
+    this.syncCurrentParams();
+  }
+
+  // Sync current params from imageAdjustParams array to currentXxx variables
+  private syncCurrentParams(): void {
+    if (this.currentSwiperIndex < this.imageAdjustParams.length) {
+      const params = this.imageAdjustParams[this.currentSwiperIndex];
+      this.currentBrightness = params.brightness;
+      this.currentContrast = params.contrast;
+      this.currentSaturation = params.saturation;
+      this.currentHue = params.hue;
+      this.currentWarmth = params.warmth;
+      this.currentExposure = params.exposure;
+      this.currentGamma = params.gamma;
+    }
+  }
+
+  // Save current params back to imageAdjustParams array
+  private saveCurrentParams(): void {
+    if (this.currentSwiperIndex < this.imageAdjustParams.length) {
+      this.imageAdjustParams[this.currentSwiperIndex] = {
+        brightness: this.currentBrightness,
+        contrast: this.currentContrast,
+        saturation: this.currentSaturation,
+        hue: this.currentHue,
+        warmth: this.currentWarmth,
+        exposure: this.currentExposure,
+        gamma: this.currentGamma
+      };
+    }
+  }
+
+  // Calculate dynamic image height based on scroll offset
+  private calculateImageHeight(): number {
+    if (this.scrollOffset <= 0) {
+      return this.MAX_IMAGE_HEIGHT;
+    }
+    // Calculate shrink progress (0 to 1)
+    const shrinkProgress = Math.min(this.scrollOffset / this.IMAGE_SHRINK_RANGE, 1);
+    // Linear interpolation between MAX and MIN
+    const height = this.MAX_IMAGE_HEIGHT - (this.MAX_IMAGE_HEIGHT - this.MIN_IMAGE_HEIGHT) * shrinkProgress;
+    return Math.max(height, this.MIN_IMAGE_HEIGHT);
+  }
+
   build() {
-    Column() {
-      // Top Section: Image Carousel (Swiper)
-      Column() {
-        // [Start swiperUsagePosition]
-        Swiper() {
-          ForEach(CAROUSEL_DATA_SOURCE, (imgRes: Resource, index: number) => {
-            // Container needed for individual scale animation
-            Column() {
-              // [Start imageUsagePosition]
-              Image(imgRes)
-                .width('100%')
-                .height('100%')
-                .objectFit(ImageFit.Contain)
-                .borderRadius(16)
-                // Apply the filter corresponding to THIS specific image index
-                .colorFilter(this.getFilterByTag(this.imageFilterTags[index]))
-              // [End imageUsagePosition]
+    Stack({ alignContent: Alignment.Top }) {
+      // åº•å±‚ï¼šæ»šåŠ¨å†…å®¹åŒºåŸŸï¼ˆå‚æ•°è°ƒæ•´åŒºåŸŸï¼‰
+      Scroll(this.scroller) {
+        Column() {
+          // å ä½åŒºåŸŸï¼Œä¸ºé¡¶éƒ¨çš„å›¾ç‰‡åŒºåŸŸç•™å‡ºç©ºé—´
+          Column()
+            .width('100%')
+            .height(this.calculateImageHeight() + 100) // å›¾ç‰‡é«˜åº¦ + å›¾ç‰‡è®¡æ•°åŒºåŸŸé«˜åº¦
+          
+          // Mode Switch Tabs
+          Row() {
+            Text('é¢„è®¾æ»¤é•œ')
+              .fontSize(16)
+              .fontWeight(this.editMode === 'preset' ? FontWeight.Bold : FontWeight.Normal)
+              .fontColor(this.editMode === 'preset' 
+                ? $r('sys.color.font_emphasize') 
+                : $r('sys.color.font_secondary'))
+              .padding({ left: 20, right: 20, top: 8, bottom: 8 })
+              .borderRadius(20)
+              .backgroundColor(this.editMode === 'preset' 
+                ? $r('sys.color.background_primary') 
+                : 'transparent')
+              .onClick(() => {
+                this.editMode = 'preset';
+              })
+            
+            Text('å‚æ•°è°ƒæ•´')
+              .fontSize(16)
+              .fontWeight(this.editMode === 'adjust' ? FontWeight.Bold : FontWeight.Normal)
+              .fontColor(this.editMode === 'adjust' 
+                ? $r('sys.color.font_emphasize') 
+                : $r('sys.color.font_secondary'))
+              .padding({ left: 20, right: 20, top: 8, bottom: 8 })
+              .borderRadius(20)
+              .backgroundColor(this.editMode === 'adjust' 
+                ? $r('sys.color.background_primary') 
+                : 'transparent')
+              .onClick(() => {
+                this.editMode = 'adjust';
+              })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Center)
+          .margin({ bottom: 8 })
+          
+          // Bottom Section: Control Panel
+          Column() {
+            if (this.editMode === 'preset') {
+              // Preset Filter Panel
+              this.PresetFilterPanel()
+            } else {
+              // Parameter Adjustment Panel - use @Link for two-way binding
+              AdjustPanel({
+                brightnessValue: $currentBrightness,
+                contrastValue: $currentContrast,
+                saturationValue: $currentSaturation,
+                hueValue: $currentHue,
+                warmthValue: $currentWarmth,
+                exposureValue: $currentExposure,
+                gammaValue: $currentGamma,
+                onReset: () => {
+                  this.resetCurrentParams();
+                }
+              })
             }
-            .justifyContent(FlexAlign.Center)
-            // Animation: Scale down inactive images for a "Carousel" effect
-            .scale({
-              x: this.currentSwiperIndex === index ? 1.0 : 0.9,
-              y: this.currentSwiperIndex === index ? 1.0 : 0.9
-            })
-            .animation({
-              duration: 300,
-              curve: Curve.FastOutSlowIn // Smooth physics curve
-            })
-          }, (item: Resource, index: number) => index + '_' + JSON.stringify(item))
+          }
+          .width('100%')
+          .padding({ left: 16, right: 16, bottom: 16 })
         }
-        .onChange((index: number) => {
-          // Update global index state when user swipes
-          this.currentSwiperIndex = index;
-        })
-        // [End swiperUsagePosition]
         .width('100%')
-        .height('100%')
-        .itemSpace(20)
-        .indicator(
-          Indicator.dot()
-            .selectedColor($r('sys.color.font_primary'))
-            .color($r('sys.color.font_secondary'))
-        )
-        .loop(false)
-        .effectMode(EdgeEffect.Spring)
       }
       .width('100%')
-      .height('65%')
-      .justifyContent(FlexAlign.Center)
-      .padding({ left: 16, right: 16, top: 8 })
-      .margin({ top: 45 })
-
-      // Bottom Section: Control Panel (Radios)
-      Column() {
-        Text("Apply Filter")
-          .fontSize(18)
-          .fontWeight(FontWeight.Bold)
-          .width('100%')
-          .margin({ bottom: 16 })
-          .fontColor($r('sys.color.font_primary'))
-        // [Start radioUsagePosition]
-        Grid() {
-          ForEach(FILTER_OPTIONS, (item: FilterOption) => {
-            GridItem() {
-              Row() {
-                Radio({ value: item.value, group: 'filterGroup' })
-                  .checked(this.imageFilterTags[this.currentSwiperIndex] === item.value)
-                  .onChange((isChecked: boolean) => {
-                    if (isChecked) {
-                      this.imageFilterTags[this.currentSwiperIndex] = item.value;
-                    }
-                  })
-                Text(item.label)
-                  .fontSize(14)
-                  .fontColor($r('sys.color.font_primary'))
-                  .margin({ left: 4 })
-                  .onClick(() => {
-                    this.imageFilterTags[this.currentSwiperIndex] = item.value;
-                  })
-              }
-              .width('100%')
-            }
-          }, (item: FilterOption, index: number) => index + '_' + JSON.stringify(item))
-        }
-        .columnsTemplate('1fr 1fr 1fr')
-        .rowsGap(16)
-        .columnsGap(10)
-        .width('100%')
-        // [End radioUsagePosition]
-      }
-      .layoutWeight(1)
-      .padding(24)
-      .backgroundColor($r('sys.color.background_primary'))
-      .borderRadius(16)
-      .margin({
-        left: 16,
-        right: 16,
-        top: 36,
-        bottom: 16
+      .height('100%')
+      .scrollBar(BarState.Off)
+      .edgeEffect(EdgeEffect.Spring)
+      .onScroll(() => {
+        // Update scroll offset
+        this.scrollOffset = this.scroller.currentOffset().yOffset;
       })
+      .onScrollEdge((side: Edge) => {
+        // Reset scroll offset when reaching top edge
+        if (side === Edge.Top) {
+          this.scrollOffset = 0;
+        }
+      })
+      
+      // é¡¶å±‚ï¼šå›ºå®šçš„å›¾ç‰‡åŒºåŸŸï¼ˆå¸é¡¶æ•ˆæœï¼‰
+      Column() {
+        // Top status bar area
+        Row()
+          .width('100%')
+          .height(45)
+          .backgroundColor($r('sys.color.background_secondary'))
+        
+        // Image Carousel Section
+        Column() {
+          // [Start swiperUsagePosition]
+          Swiper() {
+            ForEach(this.imageList, (imgSource: ImageSource, index: number) => {
+              // Container needed for individual scale animation
+              Column() {
+                // [Start imageUsagePosition]
+                Image(imgSource)
+                  .width('100%')
+                  .height('100%')
+                  .objectFit(ImageFit.Contain)
+                  .borderRadius(16)
+                  // Apply filter based on current edit mode
+                  .colorFilter(this.getCurrentFilter(index))
+                // [End imageUsagePosition]
+              }
+              .justifyContent(FlexAlign.Center)
+              // Animation: Scale down inactive images for a "Carousel" effect
+              .scale({
+                x: this.currentSwiperIndex === index ? 1.0 : 0.9,
+                y: this.currentSwiperIndex === index ? 1.0 : 0.9
+              })
+              .animation({
+                duration: 300,
+                curve: Curve.FastOutSlowIn // Smooth physics curve
+              })
+            }, (item: ImageSource, index: number) => index + '_' + (typeof item === 'string' ? item : 'resource'))
+          }
+          .onChange((index: number) => {
+            // Save current params before switching
+            this.saveCurrentParams();
+            // Update global index state when user swipes
+            this.currentSwiperIndex = index;
+            // Sync params from new image
+            this.syncCurrentParams();
+          })
+          // [End swiperUsagePosition]
+          .width('100%')
+          .height('100%')
+          .itemSpace(20)
+          .indicator(
+            Indicator.dot()
+              .selectedColor($r('sys.color.font_primary'))
+              .color($r('sys.color.font_secondary'))
+          )
+          .loop(false)
+          .effectMode(EdgeEffect.Spring)
+        }
+        .width('100%')
+        .height(this.calculateImageHeight())
+        .justifyContent(FlexAlign.Center)
+        .padding({ left: 16, right: 16, top: 8 })
+        
+        // Image counter and add button
+        Row() {
+          Text(`å›¾ç‰‡ ${this.currentSwiperIndex + 1} / ${this.imageList.length}`)
+            .fontSize(14)
+            .fontColor($r('sys.color.font_secondary'))
+          
+          Blank()
+          
+          Button({ type: ButtonType.Normal }) {
+            Row() {
+              Text('+')
+                .fontSize(18)
+                .fontColor($r('sys.color.font_emphasize'))
+              Text('æ·»åŠ å›¾ç‰‡')
+                .fontSize(14)
+                .fontColor($r('sys.color.font_emphasize'))
+                .margin({ left: 4 })
+            }
+          }
+          .backgroundColor($r('sys.color.background_primary'))
+          .borderRadius(20)
+          .height(36)
+          .padding({ left: 16, right: 16 })
+          .onClick(() => {
+            this.pickImages();
+          })
+        }
+        .width('100%')
+        .padding({ left: 16, right: 16 })
+        .margin({ top: 8, bottom: 8 })
+      }
+      .width('100%')
+      .backgroundColor($r('sys.color.background_secondary'))
     }
     .height('100%')
     .width('100%')
     .backgroundColor($r('sys.color.background_secondary'))
     .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+  }
+
+  // Preset Filter Panel Builder
+  @Builder
+  PresetFilterPanel() {
+    Column() {
+      Text("Apply Filter")
+        .fontSize(18)
+        .fontWeight(FontWeight.Bold)
+        .width('100%')
+        .margin({ bottom: 16 })
+        .fontColor($r('sys.color.font_primary'))
+      // [Start radioUsagePosition]
+      Grid() {
+        ForEach(FILTER_OPTIONS, (item: FilterOption) => {
+          GridItem() {
+            Row() {
+              Radio({ value: item.value, group: 'filterGroup' })
+                .checked(this.imageFilterTags[this.currentSwiperIndex] === item.value)
+                .onChange((isChecked: boolean) => {
+                  if (isChecked) {
+                    this.imageFilterTags[this.currentSwiperIndex] = item.value;
+                  }
+                })
+              Text(item.label)
+                .fontSize(14)
+                .fontColor($r('sys.color.font_primary'))
+                .margin({ left: 4 })
+                .onClick(() => {
+                  this.imageFilterTags[this.currentSwiperIndex] = item.value;
+                })
+            }
+            .width('100%')
+          }
+        }, (item: FilterOption, index: number) => index + '_' + JSON.stringify(item))
+      }
+      .columnsTemplate('1fr 1fr 1fr')
+      .rowsGap(16)
+      .columnsGap(10)
+      .width('100%')
+      .layoutWeight(1)
+      .scrollBar(BarState.Off)
+      .edgeEffect(EdgeEffect.Spring)
+      // [End radioUsagePosition]
+    }
+    .width('100%')
+    .height('100%')
+    .padding(24)
+    .backgroundColor($r('sys.color.background_primary'))
+    .borderRadius(16)
+  }
+
+  // Pick images from gallery
+  private async pickImages(): Promise<void> {
+    const uris = await ImagePickerUtil.pickImages(this.context, 10);
+    if (uris.length > 0) {
+      // Add new images to the list
+      for (let i = 0; i < uris.length; i++) {
+        this.imageList.push(uris[i]);
+        this.imageFilterTags.push('original');
+        this.imageAdjustParams.push({
+          brightness: DEFAULT_ADJUST_PARAMS.brightness,
+          contrast: DEFAULT_ADJUST_PARAMS.contrast,
+          saturation: DEFAULT_ADJUST_PARAMS.saturation,
+          hue: DEFAULT_ADJUST_PARAMS.hue,
+          warmth: DEFAULT_ADJUST_PARAMS.warmth,
+          exposure: DEFAULT_ADJUST_PARAMS.exposure,
+          gamma: DEFAULT_ADJUST_PARAMS.gamma
+        });
+      }
+    }
+  }
+
+  // Reset current image parameters to default (triggers reactive update)
+  private resetCurrentParams(): void {
+    const currentIndex = this.currentSwiperIndex;
+    // Reset to default values
+    const defaultParams: AdjustParams = {
+      brightness: DEFAULT_ADJUST_PARAMS.brightness,
+      contrast: DEFAULT_ADJUST_PARAMS.contrast,
+      saturation: DEFAULT_ADJUST_PARAMS.saturation,
+      hue: DEFAULT_ADJUST_PARAMS.hue,
+      warmth: DEFAULT_ADJUST_PARAMS.warmth,
+      exposure: DEFAULT_ADJUST_PARAMS.exposure,
+      gamma: DEFAULT_ADJUST_PARAMS.gamma
+    };
+    // Update imageAdjustParams array
+    this.imageAdjustParams[currentIndex] = defaultParams;
+    // Update currentXxx variables for @Link binding (this will update sliders)
+    this.currentBrightness = defaultParams.brightness;
+    this.currentContrast = defaultParams.contrast;
+    this.currentSaturation = defaultParams.saturation;
+    this.currentHue = defaultParams.hue;
+    this.currentWarmth = defaultParams.warmth;
+    this.currentExposure = defaultParams.exposure;
+    this.currentGamma = defaultParams.gamma;
+  }
+
+  // Get current filter based on edit mode
+  private getCurrentFilter(index: number): ColorFilter | number[] {
+    if (this.editMode === 'preset') {
+      return this.getFilterByTag(this.imageFilterTags[index]);
+    } else {
+      // For current image, use currentXxx variables (for real-time preview)
+      if (index === this.currentSwiperIndex) {
+        return generateAdjustMatrix({
+          brightness: this.currentBrightness,
+          contrast: this.currentContrast,
+          saturation: this.currentSaturation,
+          hue: this.currentHue,
+          warmth: this.currentWarmth,
+          exposure: this.currentExposure,
+          gamma: this.currentGamma
+        });
+      } else {
+        return generateAdjustMatrix(this.imageAdjustParams[index]);
+      }
+    }
   }
 
   // [Start getFilterByTagFunc]
@@ -403,21 +1226,155 @@ struct Index {
     return option ? option.filter : ORIGINAL_MATRIX;
   }
   // [End getFilterByTagFunc]
-}ÀÔrD‘¼../constants/CommonConstantsÔrE—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÂÙ_D:\DevEcoStudio\Projects\image-filter-master-3\entry\src\main\ets\constants\CommonConstants.etsAÃªoh-resolveÂ“ÔrF–§version¤fileªsourceRoot§sources¥names¨mappings¨Index.js ‘©Index.etsÜ ú‘”    ‘” œ”   ” ”	 	” ” ”- -”/ =”> ÌL”Ì@ ÌN”ÌF ÌT”Ìd Ìr”Ìe Ìs’” ” ‘”  ’”ÌA &”ÌB '’”> *”Ì@ ,‘” Ìs’” 	” ’” 	” ’” 	” ’” 	” ’” ” ’” ” ’” ”6 2Ü ” ” ” 	” ” ”# ”( $”) -”= ÌA”> ÌB”ÌD ÌH”ÌE ÌI”ÌF ÌJ”ÌJ ÌN”ÌK ÌO”ÌU ÌY”ÌV ÌZ”ÌW Ì[’” ” ’” ” ‘”  ’” !” !
-–” !” !
-” Ì†” Ì†” Ì†”  Ì†–” !” !
-” Ì‡” Ì‡
-” Ì‡” Ì‡”” !” !
-” Ìˆ”" ÌˆÜ ” !” !
-” Ì‰”! Ì‰”" Ì‰”# Ì‰”/ Ì‰!”0 Ì‰"”6 Ì‰(”7 Ì‰)”9 Ì‰+”: Ì‰,”ÌF Ì‰8”ÌG Ì‰9”ÌJ Ì‰<”ÌL Ì‰>”ÌX Ì‰ÌJ”ÌY Ì‰ÌK”Ì_ Ì‰ÌQ”Ì` Ì‰ÌR’” "”3 "-’” #” #’” "”3 "-–” #” #” ÌO” ÌO” ÌO” ÌO’” "”3 "-–” #” #” ÌP” ÌP” ÌP” ÌP’” "”3 "-˜” #” #” ÌQ”! ÌQ”" ÌQ”+ ÌQ”, ÌQ ”2 ÌQ&’” "”3 "-Ü ” #” #” ÌR” ÌR” ÌR” ÌR”! ÌR”# ÌR”% ÌR”' ÌR”, ÌR ”. ÌR"”0 ÌR$”2 ÌR&”5 ÌR)”7 ÌR+”8 ÌR,”: ÌR.’” "”3 "-š” #” #” ÌS” ÌS” ÌS” ÌS” ÌS”! ÌS”# ÌS”% ÌS’” $”* $&’” %” %’” $”* $&™” %” %” ?	” ?” ?” ?”" ? ”$ ?"”& ?$’” Ì@
-”= Ì@7—” ÌA
-” ÌA” ÌA”' ÌA!”* ÌA$”/ ÌA)”0 ÌA*’” ÌB” ÌB	’” $”* $&–” %” %” ÌD	” ÌD” ÌD” ÌD’” $”* $&–” %” %” ÌE	” ÌE” ÌE”  ÌE’” $”* $&–” %” %” ÌF	” ÌF” ÌF” ÌF’” $”* $&™” %” %” ÌG	” ÌG” ÌH
-”& ÌH”' ÌH”* ÌH”, ÌH“” ÌI” ÌI”Ì ÌI8“” ÌJ” ÌJ”Ì† ÌJ2’” $”* $&–” %” %” ÌL	” ÌL” ÌL” ÌL’” $”* $&˜” %” %” ÌM	” ÌM” ÌM”( ÌM”) ÌM”/ ÌM%’” &
-” &’”3 &;”8 &ÌH’” '”ÌF '>’” (” (“” 9”% 9”& 9”” :”  :”" :”% :˜” ;” ;” ;”$ ;”% ;”2 ;(”3 ;)”ÌJ ;Ì@‘” <’” '”ÌF '>˜” (” (” 3”) 3”* 3”3 3%”4 3&”: 3,’” '”ÌF '>•” (” (” 5”  5”! 5Ü ” 6” 6” 6” 6”  6”2 6(”7 6-”< 62”= 63”> 64”? 65”ÌB 68”ÌC 69”ÌD 6:”ÌE 6;”ÌH 6>Ü ” 7” 7” 7” 7”  7”2 7(”7 7-”< 72”= 73”> 74”? 75”ÌB 78”ÌC 79”ÌD 7:”ÌE 7;”ÌH 7>‘” 8’” 9”% 9’” )”1 )+”” *” *”! *”' *’” )”1 )+–” *” *” +” +”  +”& +’” )”1 )+–” *” *” ,”  ,”! ,”' ,’” )”1 )+˜” *” *” -”# -”$ -”, -#”- -$”4 -+’” )”1 )+–” *” *” .”& .”' .”) . ’” )”1 )+Ü ” *” *” 0”% 0”& 0”* 0!”+ 0"”9 00”: 01”> 05”? 06”ÌN 0ÌE”ÌO 0ÌF”ÌT 0ÌK”ÌU 0ÌL”ÌV 0ÌM’” '”ÌB '>’” (” (Ü ”/ &”ÌC &&”Ì] =”Ì^ =”Ìb =”Ìd =”Ìi =+”Ìk =-”Ìm =/”Ìn =0”Ìs =5”Ìv =8”Ìy =;”Ì| =>”Ì€ =ÌB”Ì =ÌC”ÌŠ =ÌL”Ì‹ =ÌM”Ì =ÌQ”Ì =ÌR’” &
-” &’” $”& $&’” %” %’” "”/ "-’” #” #’” ÌU”5 ÌU/’” ÌV” ÌV’” ÌU”5 ÌU/–” ÌV” ÌV” Ì{” Ì{”  Ì{”! Ì{’” ÌU”5 ÌU/–” ÌV” ÌV” Ì|” Ì|” Ì|” Ì|’” ÌU”5 ÌU/”” ÌV” ÌV” Ì}”" Ì}’” ÌU”5 ÌU/–” ÌV” ÌV” Ì~” Ì~”  Ì~”" Ì~’” ÌU”5 ÌU/•” ÌV” ÌV” Ì” Ì” Ì”” Ì€” Ì€” Ì€” Ì€”” Ì” Ì” Ì” Ì”” Ì‚” Ì‚” Ì‚” Ì‚”” Ìƒ” Ìƒ” Ìƒ” Ìƒ‘” Ì„”” ÌW” ÌW” ÌW”& ÌW–” ÌW” ÌW” ÌX” ÌX” ÌX” ÌX˜” ÌW” ÌW” ÌY” ÌY” ÌY”& ÌY ”' ÌY!”+ ÌY%–” ÌW” ÌW” ÌZ” ÌZ” ÌZ” ÌZš” ÌW” ÌW” Ì[” Ì[” Ì[” Ì[”  Ì[”" Ì[”$ Ì[”& Ì[ ”” ÌW” ÌW” Ì\” Ì\’” ÌW” ÌW’” Ì]”) Ì]%’” Ì^” Ì^’” Ì]”) Ì]%–” Ì^” Ì^” Ìu	”  Ìu”! Ìu”. Ìu&’” Ì]”) Ì]%–” Ì^” Ì^” Ìv	” Ìv” Ìv” Ìv’” Ì]”) Ì]%–” Ì^” Ì^” Ìw	” Ìw” Ìw” Ìw’” Ì]”) Ì]%–” Ì^” Ì^” Ìx	” Ìx” Ìx” Ìx’” Ì_
-” Ì_’” Ìa” Ìa–” Ìa” Ìa”  Ìq”% Ìq”& Ìq”, Ìq” Ìb”! Ìb”) Ìb”+ Ìb”0 Ìb”2 Ìb”6 Ìb#”7 Ìb$”< Ìb)”> Ìb+”ÌC Ìb0”ÌE Ìb2”ÌR Ìb?”ÌT ÌbÌAÜ ” Ìb”! Ìb”" Ìc”) Ìc”* Ìc”. Ìc”/ Ìc ”> Ìc/”? Ìc0”ÌC Ìc4”ÌD Ìc5”ÌV ÌcÌG”ÌW ÌcÌH”Ì\ ÌcÌM”Ì` ÌcÌQ”Ìa ÌcÌR”Ìf ÌcÌW™” Ìb”! Ìb”" Ìd”* Ìd”+ Ìd”, Ìd”5 Ìd/”7 Ìd1”9 Ìd3””  Ìe”$ Ìe”- Ìe!”/ Ìe#”$ Ìf”( Ìf”) Ìf”8 Ìf*”9 Ìf+”= Ìf/”> Ìf0”ÌP ÌfÌB”ÌQ ÌfÌC”ÌT ÌfÌF”ÌX ÌfÌJ”ÌY ÌfÌK”Ì^ ÌfÌP”Ì_ ÌfÌQ‘”! Ìg’” Ìh” Ìh–” Ìi”  Ìi”( Ìi”, Ìi”- Ìi”2 Ìi–” Ìi”  Ìi”! Ìj”) Ìj”* Ìj”, Ìj”” Ìi”  Ìi”! Ìk”* Ìkš” Ìi”  Ìi”! Ìl”' Ìl”( Ìl”* Ìl”. Ìl ”0 Ìl"”1 Ìl#”3 Ìl%—” Ìi”  Ìi”! Ìm”( Ìm”) Ìm”, Ìm”. Ìm ”  Ìn”$ Ìn”% Ìn”4 Ìn(”5 Ìn)”9 Ìn-”: Ìn.”ÌL ÌnÌ@”ÌM ÌnÌA”ÌP ÌnÌD”ÌT ÌnÌH”ÌU ÌnÌI”ÌZ ÌnÌN”Ì[ ÌnÌO’” Ìo” Ìo’” Ìi” Ìi’” Ìa” Ìa’” Ì`”  Ì`Ü ”/ Ì_”= Ì_ ”ÌW Ìs”ÌX Ìs”Ì\ Ìs ”Ì^ Ìs"”Ìc Ìs/”Ìe Ìs1”Ìg Ìs3”Ìh Ìs4”Ìm Ìs9”Ìp Ìs<”Ìs Ìs?”Ìv ÌsÌB”Ìz ÌsÌF”Ì{ ÌsÌG”Ì„ ÌsÌP”Ì… ÌsÌQ”Ì‰ ÌsÌU”ÌŠ ÌsÌV’” Ì_
-” Ì_’” Ì]”% Ì]%’” Ì^” Ì^’” ÌU”1 ÌU/’” ÌV” ÌV’” !” !
-‘” ÌŠ’” ÌŒ”! ÌŒ’” Ì”ÌI ÌÌG”” Ì
-” Ì” Ì” Ì$Ü ” Ì” Ì
-” Ì” Ì”% Ì!”& Ì"”* Ì&”+ Ì'”. Ì*”/ Ì+”1 Ì-”2 Ì.”5 Ì1”6 Ì2”; Ì7”Ì@ Ì<”ÌC Ì?”ÌD ÌÌ@”ÌE ÌÌA” Ì” Ì” Ì” Ì” Ì” Ì” Ì” Ì”% Ì!”& Ì"”' Ì#”( Ì$”7 Ì3”8 Ì4’” Ì‘” Ì‘ÔrG–§version¤file§sources®sourcesContent¥names¨mappingsÀ‘À‘ÀÜ‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
- ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌĞ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  Ìİ ‘”  ÌŞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ‘”  Ìé ‘”  Ìê ‘”  Ìë ‘”  Ìì ‘”  Ìí ‘”  Ìî ‘”  Ìï ‘”  Ìğ ‘”  Ìñ ‘”  Ìò ‘”  Ìó ‘”  Ìô ‘”  Ìõ ‘”  Ìö ‘”  Ì÷ ‘”  Ìø ‘”  Ìù ‘”  Ìú ‘”  Ìû ‘”  Ìü ‘”  Ìı ‘”  Ìş ‘”  Ìÿ ‘”  Í  ‘”  Í ‘”  Í ÔrH’§missing¦pluginÃ¦genAbcÂÔ  ÔrI”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache‘ÔrJ•¤type¥start£endªspecifiers¦source±ImportDeclarationÍéÍN“ÔrK•¤type¥start£end¨imported¥local¯ImportSpecifierÍòÍÔrL”¤type¥start£end¤nameªIdentifierÍòÍ´CAROUSEL_DATA_SOURCELªIdentifierÍòÍ´CAROUSEL_DATA_SOURCEK¯ImportSpecifierÍÍLªIdentifierÍÍ®FILTER_OPTIONSLªIdentifierÍÍ®FILTER_OPTIONSK¯ImportSpecifierÍÍ'LªIdentifierÍÍ'¯ORIGINAL_MATRIXLªIdentifierÍÍ'¯ORIGINAL_MATRIXÔrM•¤type¥start£end¥value£raw§LiteralÍ/ÍM¼../constants/CommonConstants¾'../constants/CommonConstants'
+}
+ÀÔrD“¼../constants/CommonConstants¸../utils/ImagePickerUtil¹../components/AdjustPanelÔrE—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÂÙ_D:\DevEcoStudio\Projects\image-filter-master-3\entry\src\main\ets\constants\CommonConstants.etsAÃªoh-resolveÂEAÂÙ[D:\DevEcoStudio\Projects\image-filter-master-3\entry\src\main\ets\utils\ImagePickerUtil.etsAÃªoh-resolveÂEAÂÙ\D:\DevEcoStudio\Projects\image-filter-master-3\entry\src\main\ets\components\AdjustPanel.etsAÃªoh-resolveÂ“ÔrF–§version¤fileªsourceRoot§sources¥names¨mappings¨Index.js ‘©Index.etsÜô‘”    ‘” Ü ”   ” ”	 ” ” ”- ”/ ”> ”Ì@ ”ÌU ”ÌW ”Ìk ”Ìm ”Ìs ”Ì‘ %”Ì’ &˜”   ” ”	 	” ” ” ”7 7”8 8˜”   ” ”	 	” ” ”   ”: :”; ;’” $” $‘” " •” &-”! &7”" &8”& &<”' &ÌX’”ÌA )&”ÌB )'’”8 +)”: ++’”> -*”Ì@ -,’”Ì@ /2”ÌB /4’”7 1”? 1&””Ì@ 4%”ÌU 4:”ÌV 4;”Ì` 4ÌE””> 5#”ÌS 58”ÌT 59”Ì\ 5ÌA””Ì@ 6%”ÌU 6:”ÌV 6;”Ì` 6ÌE””9 7”ÌN 73”ÌO 74”ÌR 77””< 8!”ÌQ 86”ÌR 87”ÌX 8=””> 9#”ÌS 98”ÌT 99”Ì\ 9ÌA””; : ”ÌP :5”ÌQ :6”ÌV :;’”; = ”< =!’”  Ì@.”# Ì@1’”  ÌA.”# ÌA1’”" ÌB0”% ÌB3”” ÌE” ÌE#”$ ÌE+”& ÌE-‘”  %’” )	” )’” )	” )’” +	” +’” +	” +’” -	” -’” -	” -’” /	” /’” /	” /’” 1	” 1’” 1	” 1’” 4	” 4’” 4	” 4’” 5	” 5’” 5	” 5’” 6	” 6’” 6	” 6’” 7	” 7’” 7	” 7’” 8	” 8’” 8	” 8’” 9	” 9’” 9	” 9’” :	” :’” :	” :’” =	” =’” =	” =’” ÌG” ÌG’” ÌH” ÌH’” ÌI”8 ÌI4š” ÌJ” ÌJ” ÌJ	” ÌJ” ÌJ” ÌJ” ÌJ”1 ÌJ-”2 ÌJ.”3 ÌJ/’” ÌK”6 ÌK2Ü ” ÌL” ÌL” ÌL	” ÌL” ÌL”# ÌL”( ÌL$”) ÌL-”- ÌL1”. ÌL2”7 ÌL;”8 ÌL<”> ÌLÌB”? ÌLÌC”Ì@ ÌLÌD”ÌD ÌLÌH”ÌE ÌLÌI”ÌO ÌLÌS”ÌP ÌLÌT”ÌQ ÌLÌU’” ÌM”ÌC ÌM?–” ÌN” ÌN” ÌN	” ÌN” ÌN”  ÌN’” ÌO” ÌO’” ÌP” ÌP’” ÌR”- ÌR+’” ÌS
+” ÌS”” ÌT” ÌT
+” ÌT” ÌT(–” ÌU” ÌU” ÌU”- ÌU'”. ÌU(”8 ÌU2–” ÌV” ÌV” ÌV”+ ÌV%”, ÌV&”4 ÌV.–” ÌW” ÌW” ÌW”- ÌW'”. ÌW(”8 ÌW2–” ÌX” ÌX	” ÌX”& ÌX ”' ÌX!”* ÌX$–” ÌY” ÌY” ÌY”) ÌY#”* ÌY$”0 ÌY*–” ÌZ” ÌZ” ÌZ”+ ÌZ%”, ÌZ&”4 ÌZ.–” Ì[” Ì[” Ì[”( Ì["”) Ì[#”. Ì[(’”	 Ì\”
+ Ì\—” Ì]” Ì]” Ì]	” Ì]”! Ì]”# Ì]”$ Ì] Ü ” Ì^” Ì^	” Ì^” Ì^” Ì^” Ì^” Ì^” Ì^” Ì^”  Ì^”! Ì^”* Ì^&”+ Ì^'”1 Ì^-”3 Ì^/”4 Ì^0”6 Ì^2”8 Ì^4—” Ì_” Ì_
+” Ì_”" Ì_”# Ì_”' Ì_!”( Ì_"–” Ì`” Ì`” Ì`”) Ì`!”* Ì`"”4 Ì`,–” Ìa” Ìa” Ìa”' Ìa”( Ìa ”0 Ìa(–” Ìb” Ìb” Ìb”) Ìb!”* Ìb"”4 Ìb,–” Ìc” Ìc” Ìc”" Ìc”# Ìc”& Ìc–” Ìd” Ìd” Ìd”% Ìd”& Ìd”, Ìd$–” Ìe” Ìe” Ìe”' Ìe”( Ìe ”0 Ìe(–” Ìf” Ìf” Ìf”$ Ìf”% Ìf”* Ìf"“” Ìg” Ìg” Ìg	‘”	 Ìh’” Ìi”/ Ìi+–” Ìj” Ìj” Ìj	” Ìj”  Ìj”! Ìj’” Ìk” Ìk’” Ìm”ÌO ÌmÌM’” Ìn
+” Ìnœ” Ìo” Ìo” Ìo” Ìo”# Ìo”& Ìo"”* Ìo&”+ Ìo'”< Ìo8”= Ìo9”ÌC Ìo?”ÌE ÌoÌA” Ìp” Ìp” Ìp” Ìp” Ìp”  Ìp”1 Ìp+”2 Ìp,”6 Ìp0”7 Ìp1”ÌI ÌpÌC”ÌJ ÌpÌD”ÌK ÌpÌE™” Ìq” Ìq
+” Ìq”" Ìq”% Ìq”+ Ìq%”, Ìq&”6 Ìq0”7 Ìq1™” Ìr” Ìr
+” Ìr”  Ìr”# Ìr”) Ìr#”* Ìr$”2 Ìr,”3 Ìr-™” Ìs” Ìs
+” Ìs”" Ìs”% Ìs”+ Ìs%”, Ìs&”6 Ìs0”7 Ìs1™” Ìt” Ìt
+” Ìt” Ìt” Ìt”$ Ìt”% Ìt”( Ìt"”) Ìt#™” Ìu” Ìu
+” Ìu” Ìu”! Ìu”' Ìu!”( Ìu"”. Ìu(”/ Ìu)™” Ìv” Ìv
+” Ìv”  Ìv”# Ìv”) Ìv#”* Ìv$”2 Ìv,”3 Ìv-™” Ìw” Ìw
+” Ìw” Ìw”  Ìw”& Ìw ”' Ìw!”, Ìw&”- Ìw'‘”	 Ìx’” Ìy” Ìy’” Ì{”: Ì{8’” Ì|
+” Ì|œ” Ì}” Ì}” Ì}” Ì}”# Ì}”& Ì}"”* Ì}&”+ Ì}'”< Ì}8”= Ì}9”ÌC Ì}?”ÌE Ì}ÌAš” Ì~” Ì~
+” Ì~”" Ì~”# Ì~”' Ì~!”( Ì~"”: Ì~4”; Ì~5”> Ì~8–” Ì” Ì” Ì”  Ì”! Ì”2 Ì*–” Ì€” Ì€” Ì€” Ì€” Ì€”. Ì€&–” Ì” Ì” Ì”  Ì”! Ì”2 Ì*–” Ì‚” Ì‚” Ì‚” Ì‚” Ì‚”$ Ì‚–” Ìƒ” Ìƒ” Ìƒ” Ìƒ” Ìƒ”* Ìƒ"–” Ì„” Ì„” Ì„” Ì„” Ì„”. Ì„&–” Ì…” Ì…” Ì…” Ì…” Ì…”( Ì… ’” Ì†” Ì†‘”	 Ì‡’” Ìˆ” Ìˆ’” ÌŠ”< ÌŠ:’” Ì‹
+” Ì‹˜” ÌŒ” ÌŒ” ÌŒ” ÌŒ” ÌŒ”! ÌŒ”" ÌŒ”$ ÌŒ –” Ì” Ì” Ì” Ì”( Ì"”) Ì#‘”	 Ì’” Ì”- Ì)Ü ” Ì” Ì
+” Ì” Ì”# Ì”$ Ì ”' Ì#”( Ì$”, Ì(”- Ì)”9 Ì5”< Ì8”Ì@ Ì<”ÌA Ì=”ÌS ÌÌO”ÌU ÌÌQ”ÌV ÌÌR”ÌW ÌÌS”ÌX ÌÌT’” Ì‘”3 Ì‘/Ü ” Ì’” Ì’
+” Ì’” Ì’” Ì’” Ì’”, Ì’(”/ Ì’+”0 Ì’,”4 Ì’0”5 Ì’1”ÌE Ì’ÌA”ÌH Ì’ÌD”ÌL Ì’ÌH”ÌM Ì’ÌI”Ì] Ì’ÌY”Ì^ Ì’ÌZ”Ìa Ì’Ì]”Ìo Ì’Ìk”Ìp Ì’Ìl” Ì“” Ì“” Ì“” Ì“” Ì“” Ì“” Ì“”  Ì“”$ Ì“ ”% Ì“!”5 Ì“1”6 Ì“2”7 Ì“3’” Ì”” Ì”‘” Ì–š” Ì—” Ì—	” Ì—
+” Ì—”' Ì—”) Ì—”2 Ì—#”3 Ì—$”6 Ì—'”8 Ì—)–” Ì—” Ì—	” ÍM” ÍM” ÍM” ÍM–” Ì—” Ì—	” ÍN” ÍN
+” ÍN” ÍN”” Ì—” Ì—	” ÍO”! ÍOÜ ” Ì—” Ì—	” ÍP”  ÍP”! ÍP”" ÍP”. ÍP!”/ ÍP"”5 ÍP(”6 ÍP)”8 ÍP+”9 ÍP,”ÌE ÍP8”ÌF ÍP9”ÌI ÍP<”ÌK ÍP>”ÌW ÍPÌJ”ÌX ÍPÌK”Ì^ ÍPÌQ”Ì_ ÍPÌR’” Ì˜”  Ì˜–” Ì™” Ì™” Ì™” Ì™” Ì™”' Ì™’” Ì˜”  Ì˜–” Ì™” Ì™” ÌŞ” ÌŞ” ÌŞ” ÌŞ’” Ì˜”  Ì˜–” Ì™” Ì™” Ìß” Ìß” Ìß”  Ìß’” Ì˜”  Ì˜˜” Ì™” Ì™” Ìà” Ìà” Ìà”% Ìà”& Ìà”) Ìà’” Ì˜”  Ì˜˜” Ì™” Ì™” Ìá” Ìá” Ìá”( Ìá”) Ìá”/ Ìá#’” Ì˜”  Ì˜—” Ì™” Ì™” Ìâ” Ìâ” Ìâ” Ìâ”! Ìâ’” Ìã”' Ìã” Ìä” Ìä” Ìä”! Ìä”$ Ìä”( Ìä ”) Ìä!”1 Ìä)”2 Ìä*”? Ìä7”ÌA Ìä9”ÌB Ìä:”ÌI ÌäÌA”ÌJ ÌäÌB’” Ìå” Ìå’” Ì˜”  Ì˜™” Ì™” Ì™” Ìæ” Ìæ”  Ìæ”! Ìæ”% Ìæ”' Ìæ!”) Ìæ#’” Ìç”= Ìç5˜” Ìè” Ìè” Ìè” Ìè”! Ìè”" Ìè”% Ìè”' Ìè—” Ìé
+” Ìé” Ìé”% Ìé”( Ìé”) Ìé”* Ìé ‘” Ìê	’” Ìë” Ìë’” Ìš” Ìš–” Ìš” Ìš” ÌÜ	” ÌÜ” ÌÜ” ÌÜ’” Ì›
+”  Ì›’” Ìœ
+” Ìœ’” Ì›
+”  Ì›–” Ìœ
+” Ìœ” Ì” Ì” Ì” Ì’” Ì›
+”  Ì››” Ìœ
+” Ìœ” Ì” Ì” Ì” Ì” Ì”3 Ì-”5 Ì/”8 Ì2”; Ì5’” Ì›
+” Ì›’” Ìœ
+” Ìœ’” Ì 
+” Ì ’” Ì¡
+” Ì¡’” Ì 
+” Ì –” Ì¡
+” Ì¡” ÌÀ” ÌÀ” ÌÀ” ÌÀ’” Ì 
+” Ì ˜” Ì¡
+” Ì¡” ÌÁ” ÌÁ” ÌÁ”( ÌÁ#”) ÌÁ$”/ ÌÁ*’” Ì 
+” Ì š” Ì¡
+” Ì¡” ÌÂ” ÌÂ” ÌÂ” ÌÂ” ÌÂ”! ÌÂ”" ÌÂ”$ ÌÂ”” Ì¢” Ì¢” Ì¢” Ì¢–” Ì¢” Ì¢” Ì£” Ì£” Ì£” Ì£Ü ” Ì¢” Ì¢” Ì¤” Ì¤” Ì¤”  Ì¤”! Ì¤”) Ì¤'”. Ì¤,”6 Ì¤4”7 Ì¤5”8 Ì¤6”9 Ì¤7”ÌC Ì¤ÌA”ÌD Ì¤ÌB”ÌH Ì¤ÌF”ÌI Ì¤ÌG”ÌJ Ì¤ÌH”ÌK Ì¤ÌI”ÌU Ì¤ÌS”ÌV Ì¤ÌT”Ì\ Ì¤ÌZš” Ì¢” Ì¢” Ì¥” Ì¥” Ì¥” Ì¥”  Ì¥”( Ì¥&”- Ì¥+”5 Ì¥3•” Ì¦” Ì¦”Ì Ì§”Ì‚ Ì§”Ìñ Ì§0Ü ” Ì¢” Ì¢” Ì¨” Ì¨” Ì¨” Ì¨” Ì¨”! Ì¨”# Ì¨!”% Ì¨#”* Ì¨(”, Ì¨*”. Ì¨,”0 Ì¨.”3 Ì¨1”5 Ì¨3”6 Ì¨4”8 Ì¨6”> Ì¨<”Ì@ Ì¨>”ÌA Ì¨?”ÌC Ì¨ÌA–” Ì¢” Ì¢” Ì©” Ì©” Ì©”  Ì©š” Ì¢” Ì¢” Ìª”  Ìª”! Ìª”% Ìª#”& Ìª$”. Ìª,”3 Ìª1”; Ìª9–” Ì«” Ì«”Ì Ì¬”Ì‚ Ì¬”Ìƒ Ì¬”Ì Ì¬—” Ì¢” Ì¢” Ì­” Ì­” Ì­” Ì­” Ì­—” Ì®” Ì®” Ì®” Ì®”  Ì® ”( Ì®(”) Ì®)’” Ì¯” Ì¯’” Ì¢” Ì¢”” Ì±” Ì±” Ì±” Ì±–” Ì±” Ì±” Ì²” Ì²” Ì²” Ì²Ü ” Ì±” Ì±” Ì³” Ì³” Ì³”  Ì³”! Ì³”) Ì³'”. Ì³,”6 Ì³4”7 Ì³5”8 Ì³6”9 Ì³7”ÌC Ì³ÌA”ÌD Ì³ÌB”ÌH Ì³ÌF”ÌI Ì³ÌG”ÌJ Ì³ÌH”ÌK Ì³ÌI”ÌU Ì³ÌS”ÌV Ì³ÌT”Ì\ Ì³ÌZš” Ì±” Ì±” Ì´” Ì´” Ì´” Ì´”  Ì´”( Ì´&”- Ì´+”5 Ì´3•” Ìµ” Ìµ”Ì Ì¶”Ì‚ Ì¶”Ìñ Ì¶0Ü ” Ì±” Ì±” Ì·” Ì·” Ì·” Ì·” Ì·”! Ì·”# Ì·!”% Ì·#”* Ì·(”, Ì·*”. Ì·,”0 Ì·.”3 Ì·1”5 Ì·3”6 Ì·4”8 Ì·6”> Ì·<”Ì@ Ì·>”ÌA Ì·?”ÌC Ì·ÌA–” Ì±” Ì±” Ì¸” Ì¸” Ì¸”  Ì¸š” Ì±” Ì±” Ì¹”  Ì¹”! Ì¹”% Ì¹#”& Ì¹$”. Ì¹,”3 Ì¹1”; Ì¹9–” Ìº” Ìº”Ì Ì»”Ì‚ Ì»”Ìƒ Ì»”Ì Ì»—” Ì±” Ì±” Ì¼” Ì¼” Ì¼” Ì¼” Ì¼—” Ì½” Ì½” Ì½” Ì½”  Ì½ ”( Ì½(”) Ì½)’” Ì¾” Ì¾’” Ì±” Ì±’” Ì 
+” Ì ’” Ì¡
+” Ì¡’” ÌÄ
+”, ÌÄ*’” ÌÅ
+” ÌÅ’” ÌÄ
+”, ÌÄ*–” ÌÅ
+” ÌÅ” ÌÙ” ÌÙ” ÌÙ” ÌÙ’” ÌÄ
+”, ÌÄ*Ü ” ÌÅ
+” ÌÅ” ÌÚ” ÌÚ” ÌÚ” ÌÚ”! ÌÚ”# ÌÚ”% ÌÚ”' ÌÚ”, ÌÚ$”. ÌÚ&”0 ÌÚ(”2 ÌÚ*”8 ÌÚ0”: ÌÚ2”< ÌÚ4”> ÌÚ6˜” ÌÆ” ÌÆ” ÌÆ” ÌÆ” ÌÆ”" ÌÆ"”* ÌÆ*”, ÌÆ,’” ÌÇ”* ÌÇ$•” ÌÈ” ÌÈ” ÌÈ”* ÌÈ$”7 ÌÈ&‘” ÌÉ‘” ÌÉ’”  ÌÊ”Ì] ÌÊÌK“”  ÌË”+ ÌË”2 ÌË“”$ ÌÌ”3 ÌÌ”ÌM ÌÌ3“”$ ÌÍ”1 ÌÍ”ÌI ÌÍ/“”$ ÌÎ”3 ÌÎ”ÌM ÌÎ3“”$ ÌÏ”, ÌÏ”? ÌÏ%“”$ ÌĞ”/ ÌĞ”ÌE ÌĞ+“”$ ÌÑ”1 ÌÑ”ÌI ÌÑ/“”$ ÌÒ”. ÌÒ”ÌC ÌÒ)•”$ ÌÓ”+ ÌÓ”- ÌÓ”0 ÌÓ”2 ÌÓ–”( ÌÔ”, ÌÔ”- ÌÔ”? ÌÔ)”ÌA ÌÔ+”ÌB ÌÔ,’”$ ÌÕ”% ÌÕ‘”! ÌÖ’”( ÌÌ”7 ÌÌ’”( ÌÍ”5 ÌÍ’”( ÌÎ”7 ÌÎ’”( ÌÏ”0 ÌÏ’”( ÌĞ”3 ÌĞ’”( ÌÑ”5 ÌÑ’”( ÌÒ”2 ÌÒ•”( ÌÓ”/ ÌÓ”1 ÌÓ”4 ÌÓ”6 ÌÓ–”, ÌÔ”0 ÌÔ”1 ÌÔ”ÌC ÌÔ)”ÌE ÌÔ+”ÌF ÌÔ,’”( ÌÕ”) ÌÕ‘” Ì×’” ÌÄ
+”( ÌÄ*’” ÌÅ
+” ÌÅ’” Ìš” Ìš’” Ì˜” Ì˜’” Ì™” Ì™’” Ìí” Ìí’” Ìî” Ìî’” Ìí” Ìí–” Ìî” Ìî” ÍJ” ÍJ” ÍJ” ÍJ’” Ìí” Ìí”” Ìî” Ìî” ÍK”" ÍK’” Ìï”" Ìï’” Ìğ” Ìğ’” Ìï”" Ìï–” Ìğ” Ìğ” Ìñ” Ìñ” Ìñ” Ìñ’” Ìï”" Ìï–” Ìğ” Ìğ” Ìò” Ìò” Ìò” Ìò’” Ìï”" Ìï”” Ìğ” Ìğ” Ìó” Ìó’” Ìï” Ìï’” Ìğ” Ìğ’” Ìõ”% Ìõ!’” Ìö” Ìö’” Ìõ”% Ìõ!–” Ìö” Ìö” Í&	” Í&” Í&” Í&’” Ìõ”% Ìõ!™” Ìö” Ìö” Í'	” Í'” Í'” Í'” Í'”3 Í')”5 Í'+’” Ìõ”% Ìõ!˜” Ìö” Ìö” Í(	”! Í(”" Í(”+ Í(!”, Í("”2 Í((’” Ìõ”% Ìõ!Ü ” Ìö” Ìö” Í)	” Í)” Í)” Í)”! Í)”# Í)”% Í)”' Í)”, Í)"”. Í)$”0 Í)&”2 Í)(”5 Í)+”7 Í)-”8 Í).”: Í)0’” Ì÷
+”* Ì÷(’” Ìø
+” Ìø’” Ì÷
+”* Ì÷(™” Ìø
+” Ìø” Í” Í” Í” Í”" Í"”$ Í$”& Í&’” Í”7 Í3–” Í” Í” Í”& Í"”( Í$”) Í%’” Í”= Í9—” Í” Í” Í”' Í#”* Í&”/ Í+”0 Í,’” Í”- Í)–” Í” Í” Í”& Í"”( Í$”) Í%’” Í
+” Í’” Ì÷
+”* Ì÷(–” Ìø
+” Ìø” Í” Í” Í” Í’” Ì÷
+”* Ì÷(–” Ìø
+” Ìø” Í” Í” Í”  Í’” Ì÷
+”* Ì÷(–” Ìø
+” Ìø” Í” Í” Í” Í’” Ì÷
+”* Ì÷(™” Ìø
+” Ìø” Í” Í” Í”& Í”' Í”* Í”, Í“” Í ” Í ”Ì Í :“” Í!” Í!”Ì† Í!4’” Ì÷
+”* Ì÷(–” Ìø
+” Ìø” Í#” Í#” Í#” Í#’” Ì÷
+”* Ì÷(˜” Ìø
+” Ìø” Í$” Í$” Í$”( Í$ ”) Í$!”/ Í$'’” Ìù” Ìù’”3 Ìù=”8 ÌùÌJ’” Ìú”ÌF ÌúÌ@’” Ìû” Ìû“” Í”% Í”& Í”” Í”  Í”" Í”% Í˜” Í” Í” Í”$ Í”% Í”2 Í*”3 Í+”ÌJ ÍÌB‘” Í’” Ìú”ÌF ÌúÌ@˜” Ìû” Ìû” Í”) Í”* Í”3 Í'”4 Í(”: Í.’” Ìú”ÌF ÌúÌ@•” Ìû” Ìû” Í”  Í”! ÍÜ ” Í	” Í	” Í	” Í	”  Í	”2 Í	*”7 Í	/”< Í	4”= Í	5”> Í	6”? Í	7”ÌB Í	:”ÌC Í	;”ÌD Í	<”ÌE Í	=”ÌH Í	Ì@Ü ” Í
+” Í
+” Í
+” Í
+”  Í
+”2 Í
+*”7 Í
+/”< Í
+4”= Í
+5”> Í
+6”? Í
+7”ÌB Í
+:”ÌC Í
+;”ÌD Í
+<”ÌE Í
+=”ÌH Í
+Ì@‘” Í’” Í”% Í’” Ìü”1 Ìü-”” Ìı” Ìı”! Ìı”* Ìı’” Ìü”1 Ìü-–” Ìı” Ìı” Ìş” Ìş”  Ìş”& Ìş’” Ìü”1 Ìü-–” Ìı” Ìı” Ìÿ”  Ìÿ”! Ìÿ”' Ìÿ ’” Ìü”1 Ìü-˜” Ìı” Ìı” Í ”# Í ”$ Í ”, Í %”- Í &”4 Í -’” Ìü”1 Ìü-–” Ìı” Ìı” Í”& Í”' Í ”) Í"’” Ìü”1 Ìü-›” Ìı” Ìı” Í”% Í”& Í”* Í#”+ Í$”; Í4”< Í5”ÌA Í:”ÌB Í;’” Ìú”ÌB ÌúÌ@’” Ìû” ÌûÜ ”/ Ìù”3 Ìù”4 Ìù”= Ìù"”ÌW Í”ÌX Í”Ì\ Í!”Ì^ Í#”Ìc Í0”Ìe Í2”Ìg Í4”Ìh Í5”Ìm Í:”Ìp Í=”Ìs ÍÌ@”Ìv ÍÌC”Ìw ÍÌD”Ì~ ÍÌK”Ì‚ ÍÌO”Ì‡ ÍÌT”Ì ÍÌ\”Ì ÍÌ]”Ì‘ ÍÌ^”Ì’ ÍÌ_”Ì– ÍÌc”Ì— ÍÌd”Ì˜ ÍÌe”Ì™ ÍÌf”Ì£ ÍÌp”Ì¤ ÍÌq’” Ìù” Ìù’” Ì÷
+”& Ì÷(’” Ìø
+” Ìø’” Ìõ”! Ìõ!’” Ìö” Ìö’” Í+”+ Í+'’” Í,” Í,’” Í+”+ Í+'–” Í,” Í,” ÍF	” ÍF” ÍF” ÍF’” Í+”+ Í+'” Í,” Í,” ÍG	” ÍG” ÍG” ÍG” ÍG”  ÍG”" ÍG”$ ÍG”) ÍG"”+ ÍG$”- ÍG&”/ ÍG(’” Í+”+ Í+'” Í,” Í,” ÍH	” ÍH” ÍH” ÍH” ÍH” ÍH” ÍH”! ÍH”' ÍH ”) ÍH"”* ÍH#”, ÍH%Ü ” Í-
+” Í-” Í-” Í-”" Í-”# Í-”5 Í-,”8 Í-/”9 Í-0”? Í-6”ÌC Í-:”ÌD Í-;”ÌM Í-ÌD”ÌN Í-ÌE”ÌT Í-ÌK”ÌV Í-ÌM–” Í-
+” Í-” Í.” Í.” Í.” Í.”” Í-
+” Í-” Í/” Í/’” Í-
+” Í-’” Í1
+” Í1’” Í1
+” Í1š” Í3
+” Í3”# Í3”% Í3”) Í3”+ Í3”5 Í3#”6 Í3$”< Í3*”> Í3,”” Í3
+” Í3” Í>”" Í>–” Í3
+” Í3” Í?” Í?”  Í?”" Í?–” Í3
+” Í3” Í@” Í@” Í@” Í@” Í3
+” Í3” ÍA” ÍA” ÍA” ÍA”! ÍA”# ÍA”% ÍA”' ÍA”, ÍA$”. ÍA&”0 ÍA(”2 ÍA*—” Í3
+” Í3” ÍB” ÍB” ÍB” ÍB”  ÍB–” ÍC” ÍC” ÍC” ÍC”! ÍC”" ÍC’” ÍD
+” ÍD’” Í4” Í4”” Í5” Í5” Í5” Í5–” Í5” Í5” Í6” Í6” Í6” Í6”” Í5” Í5” Í7” Í7’” Í5” Í5”” Í8” Í8” Í8” Í8–” Í8” Í8” Í9” Í9” Í9” Í9”” Í8” Í8” Í:” Í:š” Í8” Í8” Í;” Í;” Í;” Í;” Í;”  Í; ”! Í;!”# Í;#’” Í8” Í8’” Í4” Í4’” Í3
+” Í3’” Í+”' Í+'’” Í,” Í,’” Ìí” Ìí’” Ìî” Ìî’” Ì—” Ì—	‘” ÍQ’” ÍS”" ÍS ’” ÍU” ÍU’” ÍV” ÍV
+–” ÍV” ÍV
+” Í~” Í~
+” Í~” Í~–” ÍV” ÍV
+” Í” Í” Í”  Í–” ÍV” ÍV
+” Í€” Í€” Í€” Í€”” ÍV” ÍV
+” Í”" Í–” ÍV” ÍV
+” Í‚” Í‚”  Í‚”" Í‚”” ÍW” ÍW
+” ÍW”& ÍW–” ÍW” ÍW
+” ÍX	” ÍX” ÍX” ÍX˜” ÍW” ÍW
+” ÍY	” ÍY” ÍY”& ÍY”' ÍY”+ ÍY#–” ÍW” ÍW
+” ÍZ	” ÍZ” ÍZ” ÍZš” ÍW” ÍW
+” Í[	” Í[” Í[” Í[”  Í[”" Í[”$ Í[”& Í[”” ÍW” ÍW
+” Í\	” Í\’” ÍW” ÍW
+’” Í]”) Í]#’” Í^” Í^
+’” Í]”) Í]#–” Í^” Í^
+” Íu”  Íu”! Íu”. Íu$’” Í]”) Í]#–” Í^” Í^
+” Ív” Ív” Ív” Ív’” Í]”) Í]#–” Í^” Í^
+” Íw” Íw” Íw” Íw’” Í]”) Í]#–” Í^” Í^
+” Íx” Íx” Íx” Íx’” Í]”) Í]#–” Í^” Í^
+” Íy” Íy” Íy” Íy’” Í]”) Í]#˜” Í^” Í^
+” Íz” Íz” Íz”# Íz”$ Íz”' Íz’” Í]”) Í]#˜” Í^” Í^
+” Í{” Í{” Í{”& Í{”' Í{”- Í{#’” Í_” Í_’” Ía” Ía–” Ía” Ía”  Íq”% Íq”& Íq”, Íq” Íb”! Íb”) Íb”+ Íb”0 Íb”2 Íb”6 Íb!”7 Íb"”< Íb'”> Íb)”ÌC Íb.”ÌE Íb0”ÌR Íb=”ÌT Íb?Ü ” Íb”! Íb”" Íc”) Íc”* Íc”. Íc”/ Íc”> Íc-”? Íc.”ÌC Íc2”ÌD Íc3”ÌV ÍcÌE”ÌW ÍcÌF”Ì\ ÍcÌK”Ì` ÍcÌO”Ìa ÍcÌP”Ìf ÍcÌU™” Íb”! Íb”" Íd”* Íd”+ Íd”, Íd”5 Íd-”7 Íd/”9 Íd1””  Íe”$ Íe”- Íe”/ Íe!”$ Íf”( Íf”) Íf”8 Íf(”9 Íf)”= Íf-”> Íf.”ÌP ÍfÌ@”ÌQ ÍfÌA”ÌT ÍfÌD”ÌX ÍfÌH”ÌY ÍfÌI”Ì^ ÍfÌN”Ì_ ÍfÌO‘”! Íg’” Íh” Íh–” Íi”  Íi”( Íi”, Íi”- Íi”2 Íi–” Íi”  Íi”! Íj”) Íj”* Íj”, Íj”” Íi”  Íi”! Ík”* Íkš” Íi”  Íi”! Íl”' Íl”( Íl”* Íl”. Íl”0 Íl ”1 Íl!”3 Íl#—” Íi”  Íi”! Ím”( Ím”) Ím”, Ím”. Ím”  Ín”$ Ín”% Ín”4 Ín&”5 Ín'”9 Ín+”: Ín,”ÌL Ín>”ÌM Ín?”ÌP ÍnÌB”ÌT ÍnÌF”ÌU ÍnÌG”ÌZ ÍnÌL”Ì[ ÍnÌM’” Ío” Ío’” Íi” Íi’” Ía” Ía’” Í`
+”  Í`Ü ”/ Í_”= Í_”ÌW Ís”ÌX Ís”Ì\ Ís”Ì^ Ís ”Ìc Ís-”Ìe Ís/”Ìg Ís1”Ìh Ís2”Ìm Ís7”Ìp Ís:”Ìs Ís=”Ìv ÍsÌ@”Ìz ÍsÌD”Ì{ ÍsÌE”Ì„ ÍsÌN”Ì… ÍsÌO”Ì‰ ÍsÌS”ÌŠ ÍsÌT’” Í_” Í_’” Í]”% Í]#’” Í^” Í^
+’” ÍV” ÍV
+‘” Íƒ’” Í…” Í…”” Í†
+”	 Í†”
+ Í†” Í†Ü ” Í‡” Í‡
+” Í‡” Í‡” Í‡”* Í‡&”+ Í‡'”5 Í‡1”6 Í‡2”: Í‡6”; Í‡7”ÌB Í‡>”ÌD Í‡Ì@”ÌF Í‡ÌB”ÌG Í‡ÌC”ÌH Í‡ÌD˜” Íˆ” Íˆ” Íˆ” Íˆ” Íˆ” Íˆ” Íˆ” Íˆ’” Í‰”) Í‰#Ü ” ÍŠ” ÍŠ” ÍŠ” ÍŠ” ÍŠ” ÍŠ” ÍŠ” ÍŠ”  ÍŠ”$ ÍŠ”% ÍŠ”+ ÍŠ%”- ÍŠ'”. ÍŠ(”0 ÍŠ*”2 ÍŠ,” Í‹” Í‹” Í‹” Í‹” Í‹”# Í‹”$ Í‹”( Í‹ ”) Í‹!”* Í‹"”+ Í‹#”, Í‹$”- Í‹%š” ÍŒ” ÍŒ” ÍŒ”$ ÍŒ”% ÍŒ”) ÍŒ!”* ÍŒ"”4 ÍŒ,”5 ÍŒ-”6 ÍŒ.—” Í” Í” Í”& Í”' Í”+ Í#”, Í$–” Í
+” Í”  Í”5 Í+”6 Í,”Ì@ Í6–” Í
+” Í” Í”3 Í)”4 Í*”< Í2–” Í
+” Í”  Í”5 Í+”6 Í,”Ì@ Í6–” Í‘
+” Í‘” Í‘”. Í‘$”/ Í‘%”2 Í‘(–” Í’
+” Í’” Í’”1 Í’'”2 Í’(”8 Í’.–” Í“
+” Í“” Í“”3 Í“)”4 Í“*”< Í“2–” Í”
+” Í”” Í””0 Í”&”1 Í”'”6 Í”,“” Í•	” Í•
+” Í•‘” Í–‘”	 Í—’” Í˜” Í˜’” Íš”ÌK ÍšÌI’” Í›
+” Í›˜” Íœ” Íœ
+” Íœ” Íœ”! Íœ”" Íœ”4 Íœ0”5 Íœ1’” Í”" Í”” Í” Í
+” Í” Í(–” ÍŸ” ÍŸ” ÍŸ”- ÍŸ'”. ÍŸ(”8 ÍŸ2–” Í ” Í ” Í ”+ Í %”, Í &”4 Í .–” Í¡” Í¡” Í¡”- Í¡'”. Í¡(”8 Í¡2–” Í¢” Í¢	” Í¢”& Í¢ ”' Í¢!”* Í¢$–” Í£” Í£” Í£”) Í£#”* Í£$”0 Í£*–” Í¤” Í¤” Í¤”+ Í¤%”, Í¤&”4 Í¤.–” Í¥” Í¥” Í¥”( Í¥"”) Í¥#”. Í¥(’”	 Í¦”
+ Í¦’” Í§”) Í§%š” Í¨” Í¨” Í¨	” Í¨” Í¨”+ Í¨'”, Í¨(”/ Í¨+”< Í¨8”= Í¨9’” Í©”ÌS Í©ÌO™” Íª” Íª” Íª	” Íª”! Íª”. Íª*”/ Íª+”9 Íª5”: Íª6™” Í«” Í«” Í«	” Í«” Í«”, Í«(”- Í«)”5 Í«1”6 Í«2™” Í¬” Í¬” Í¬	” Í¬”! Í¬”. Í¬*”/ Í¬+”9 Í¬5”: Í¬6™” Í­” Í­” Í­	” Í­” Í­”' Í­#”( Í­$”+ Í­'”, Í­(™” Í®” Í®” Í®	” Í®” Í®”* Í®&”+ Í®'”1 Í®-”2 Í®.™” Í¯” Í¯” Í¯	” Í¯” Í¯”, Í¯(”- Í¯)”5 Í¯1”6 Í¯2™” Í°” Í°” Í°	” Í°” Í°”) Í°%”* Í°&”/ Í°+”0 Í°,’” Í±” Í±’” Í³”, Í³*”” Í´
+” Í´” Í´” Í´(˜” Íµ” Íµ” Íµ” Íµ” Íµ” Íµ”& Íµ"”( Íµ$” Í¶” Í¶” Í¶” Í¶”& Í¶ ”' Í¶!”+ Í¶%”, Í¶&”; Í¶5”< Í¶6”ÌA Í¶;”ÌB Í¶<”ÌC Í¶=”ÌD Í¶>‘”	 Í·‘” Í·’” Í¸”ÌR Í¸ÌL˜” Í¹” Í¹
+” Í¹” Í¹” Í¹” Í¹”1 Í¹+”3 Í¹-”” Íº” Íº”+ Íº#”, Íº$–” Í»
+” Í»”  Í»”$ Í»”% Í»”6 Í»,–” Í¼
+” Í¼” Í¼”" Í¼”# Í¼”2 Í¼(–” Í½
+” Í½”  Í½”$ Í½”% Í½”6 Í½,–” Í¾
+” Í¾” Í¾” Í¾” Í¾”( Í¾–” Í¿
+” Í¿” Í¿”  Í¿”! Í¿”. Í¿$–” ÍÀ
+” ÍÀ” ÍÀ”" ÍÀ”# ÍÀ”2 ÍÀ(–” ÍÁ
+” ÍÁ” ÍÁ” ÍÁ”  ÍÁ”, ÍÁ"“” ÍÂ	” ÍÂ
+” ÍÂ‘” ÍÃ‘” ÍÃœ” ÍÄ” ÍÄ”+ ÍÄ#”, ÍÄ$”0 ÍÄ(”1 ÍÄ)”ÌB ÍÄ:”ÌC ÍÄ;”ÌH ÍÄÌ@”ÌI ÍÄÌA”ÌJ ÍÄÌB”ÌK ÍÄÌC‘” ÍÅ‘”	 ÍÆ’” ÍÇ” ÍÇ’” ÍÉ”! ÍÉ’” ÍÊ”ÌI ÍÊÌG”” ÍË
+” ÍË” ÍË” ÍË$Ü ” ÍÌ” ÍÌ
+” ÍÌ” ÍÌ”% ÍÌ!”& ÍÌ"”* ÍÌ&”+ ÍÌ'”. ÍÌ*”/ ÍÌ+”1 ÍÌ-”2 ÍÌ.”5 ÍÌ1”6 ÍÌ2”; ÍÌ7”Ì@ ÍÌ<”ÌC ÍÌ?”ÌD ÍÌÌ@”ÌE ÍÌÌA” ÍÍ” ÍÍ” ÍÍ” ÍÍ” ÍÍ” ÍÍ” ÍÍ” ÍÍ”% ÍÍ!”& ÍÍ"”' ÍÍ#”( ÍÍ$”7 ÍÍ3”8 ÍÍ4’” ÍÎ” ÍÎÔrG–§version¤file§sources®sourcesContent¥names¨mappingsÀ‘À‘ÀÜı‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌĞ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  Ìİ ‘”  ÌŞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ‘”  Ìé ‘”  Ìê ‘”  Ìë ‘”  Ìì ‘”  Ìí ‘”  Ìî ‘”  Ìï ‘”  Ìğ ‘”  Ìñ ‘”  Ìò ‘”  Ìó ‘”  Ìô ‘”  Ìõ ‘”  Ìö ‘”  Ì÷ ‘”  Ìø ‘”  Ìù ‘”  Ìú ‘”  Ìû ‘”  Ìü ‘”  Ìı ‘”  Ìş ‘”  Ìÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ‘”  Í< ‘”  Í= ‘”  Í> ‘”  Í? ‘”  Í@ ‘”  ÍA ‘”  ÍB ‘”  ÍC ‘”  ÍD ‘”  ÍE ‘”  ÍF ‘”  ÍG ‘”  ÍH ‘”  ÍI ‘”  ÍJ ‘”  ÍK ‘”  ÍL ‘”  ÍM ‘”  ÍN ‘”  ÍO ‘”  ÍP ‘”  ÍQ ‘”  ÍR ‘”  ÍS ‘”  ÍT ‘”  ÍU ‘”  ÍV ‘”  ÍW ‘”  ÍX ‘”  ÍY ‘”  ÍZ ‘”  Í[ ‘”  Í\ ‘”  Í] ‘”  Í^ ‘”  Í_ ‘”  Í` ‘”  Ía ‘”  Íb ‘”  Íc ‘”  Íd ‘”  Íe ‘”  Íf ‘”  Íg ‘”  Íh ‘”  Íi ‘”  Íj ‘”  Ík ‘”  Íl ‘”  Ím ‘”  Ín ‘”  Ío ‘”  Íp ‘”  Íq ‘”  Ír ‘”  Ís ‘”  Ít ‘”  Íu ‘”  Ív ‘”  Íw ‘”  Íx ‘”  Íy ‘”  Íz ‘”  Í{ ‘”  Í| ‘”  Í} ‘”  Í~ ‘”  Í ‘”  Í€ ‘”  Í ‘”  Í‚ ‘”  Íƒ ‘”  Í„ ‘”  Í… ‘”  Í† ‘”  Í‡ ‘”  Íˆ ‘”  Í‰ ‘”  ÍŠ ‘”  Í‹ ‘”  ÍŒ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í‘ ‘”  Í’ ‘”  Í“ ‘”  Í” ‘”  Í• ‘”  Í– ‘”  Í— ‘”  Í˜ ‘”  Í™ ‘”  Íš ‘”  Í› ‘”  Íœ ‘”  Í ‘”  Í ‘”  ÍŸ ‘”  Í  ‘”  Í¡ ‘”  Í¢ ‘”  Í£ ‘”  Í¤ ‘”  Í¥ ‘”  Í¦ ‘”  Í§ ‘”  Í¨ ‘”  Í© ‘”  Íª ‘”  Í« ‘”  Í¬ ‘”  Í­ ‘”  Í® ‘”  Í¯ ‘”  Í° ‘”  Í± ‘”  Í² ‘”  Í³ ‘”  Í´ ‘”  Íµ ‘”  Í¶ ‘”  Í· ‘”  Í¸ ‘”  Í¹ ‘”  Íº ‘”  Í» ‘”  Í¼ ‘”  Í½ ‘”  Í¾ ‘”  Í¿ ‘”  ÍÀ ‘”  ÍÁ ‘”  ÍÂ ‘”  ÍÃ ‘”  ÍÄ ‘”  ÍÅ ‘”  ÍÆ ‘”  ÍÇ ‘”  ÍÈ ‘”  ÍÉ ‘”  ÍÊ ‘”  ÍË ‘”  ÍÌ ‘”  ÍÍ ‘”  ÍÎ ‘”  ÍÏ ‘”  ÍĞ ‘”  ÍÑ ‘”  ÍÒ ‘”  ÍÓ ‘”  ÍÔ ‘”  ÍÕ ‘”  ÍÖ ‘”  Í× ‘”  ÍØ ‘”  ÍÙ ‘”  ÍÚ ‘”  ÍÛ ‘”  ÍÜ ‘”  Íİ ‘”  ÍŞ ‘”  Íß ‘”  Íà ‘”  Íá ‘”  Íâ ‘”  Íã ‘”  Íä ‘”  Íå ‘”  Íæ ‘”  Íç ‘”  Íè ‘”  Íé ‘”  Íê ‘”  Íë ‘”  Íì ‘”  Íí ‘”  Íî ‘”  Íï ‘”  Íğ ‘”  Íñ ‘”  Íò ‘”  Íó ‘”  Íô ‘”  Íõ ‘”  Íö ‘”  Í÷ ‘”  Íø ‘”  Íù ‘”  Íú ‘”  Íû ‘”  Íü ‘”  Íı ‘”  Íş ‘”  Íÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ‘”  Í< ‘”  Í= ‘”  Í> ‘”  Í? ‘”  Í@ ‘”  ÍA ‘”  ÍB ‘”  ÍC ‘”  ÍD ‘”  ÍE ‘”  ÍF ‘”  ÍG ‘”  ÍH ‘”  ÍI ‘”  ÍJ ‘”  ÍK ‘”  ÍL ‘”  ÍM ‘”  ÍN ‘”  ÍO ‘”  ÍP ‘”  ÍQ ‘”  ÍR ‘”  ÍS ‘”  ÍT ‘”  ÍU ‘”  ÍV ‘”  ÍW ‘”  ÍX ‘”  ÍY ‘”  ÍZ ‘”  Í[ ‘”  Í\ ‘”  Í] ‘”  Í^ ‘”  Í_ ‘”  Í` ‘”  Ía ‘”  Íb ‘”  Íc ‘”  Íd ‘”  Íe ‘”  Íf ‘”  Íg ‘”  Íh ‘”  Íi ‘”  Íj ‘”  Ík ‘”  Íl ‘”  Ím ‘”  Ín ‘”  Ío ‘”  Íp ‘”  Íq ‘”  Ír ‘”  Ís ‘”  Ít ‘”  Íu ‘”  Ív ‘”  Íw ‘”  Íx ‘”  Íy ‘”  Íz ‘”  Í{ ‘”  Í| ‘”  Í} ‘”  Í~ ‘”  Í ‘”  Í€ ‘”  Í ‘”  Í‚ ‘”  Íƒ ‘”  Í„ ‘”  Í… ‘”  Í† ‘”  Í‡ ‘”  Íˆ ‘”  Í‰ ‘”  ÍŠ ‘”  Í‹ ‘”  ÍŒ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í‘ ‘”  Í’ ‘”  Í“ ‘”  Í” ‘”  Í• ‘”  Í– ‘”  Í— ‘”  Í˜ ‘”  Í™ ‘”  Íš ‘”  Í› ‘”  Íœ ‘”  Í ‘”  Í ‘”  ÍŸ ‘”  Í  ‘”  Í¡ ‘”  Í¢ ‘”  Í£ ‘”  Í¤ ‘”  Í¥ ‘”  Í¦ ‘”  Í§ ‘”  Í¨ ‘”  Í© ‘”  Íª ‘”  Í« ‘”  Í¬ ‘”  Í­ ‘”  Í® ‘”  Í¯ ‘”  Í° ‘”  Í± ‘”  Í² ‘”  Í³ ‘”  Í´ ‘”  Íµ ‘”  Í¶ ‘”  Í· ‘”  Í¸ ‘”  Í¹ ‘”  Íº ‘”  Í» ‘”  Í¼ ‘”  Í½ ‘”  Í¾ ‘”  Í¿ ‘”  ÍÀ ‘”  ÍÁ ‘”  ÍÂ ‘”  ÍÃ ‘”  ÍÄ ‘”  ÍÅ ‘”  ÍÆ ‘”  ÍÇ ‘”  ÍÈ ‘”  ÍÉ ‘”  ÍÊ ‘”  ÍË ‘”  ÍÌ ‘”  ÍÍ ‘”  ÍÎ ‘”  ÍÏ ‘”  ÍĞ ‘”  ÍÑ ‘”  ÍÒ ‘”  ÍÓ ‘”  ÍÔ ‘”  ÍÕ ‘”  ÍÖ ‘”  Í× ‘”  ÍØ ‘”  ÍÙ ‘”  ÍÚ ‘”  ÍÛ ‘”  ÍÜ ‘”  Íİ ‘”  ÍŞ ‘”  Íß ‘”  Íà ‘”  Íá ‘”  Íâ ‘”  Íã ‘”  Íä ‘”  Íå ‘”  Íæ ‘”  Íç ‘”  Íè ‘”  Íé ‘”  Íê ‘”  Íë ‘”  Íì ‘”  Íí ‘”  Íî ‘”  Íï ‘”  Íğ ‘”  Íñ ‘”  Íò ‘”  Íó ‘”  Íô ‘”  Íõ ‘”  Íö ‘”  Í÷ ‘”  Íø ‘”  Íù ‘”  Íú ‘”  Íû ‘”  Íü ÔrH’§missing¦pluginÃ¦genAbcÂÔ  ÔrI”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache“ÔrJ•¤type¥start£endªspecifiers¦source±ImportDeclarationÍéÍ{•ÔrK•¤type¥start£end¨imported¥local¯ImportSpecifierÍòÍÔrL”¤type¥start£end¤nameªIdentifierÍòÍ´CAROUSEL_DATA_SOURCELªIdentifierÍòÍ´CAROUSEL_DATA_SOURCEK¯ImportSpecifierÍÍLªIdentifierÍÍ®FILTER_OPTIONSLªIdentifierÍÍ®FILTER_OPTIONSK¯ImportSpecifierÍÍ'LªIdentifierÍÍ'¯ORIGINAL_MATRIXLªIdentifierÍÍ'¯ORIGINAL_MATRIXK¯ImportSpecifierÍ)Í>LªIdentifierÍ)Í>µDEFAULT_ADJUST_PARAMSLªIdentifierÍ)Í>µDEFAULT_ADJUST_PARAMSK¯ImportSpecifierÍ@ÍTLªIdentifierÍ@ÍT´generateAdjustMatrixLªIdentifierÍ@ÍT´generateAdjustMatrixÔrM•¤type¥start£end¥value£raw§LiteralÍ\Íz¼../constants/CommonConstants¾'../constants/CommonConstants'J±ImportDeclarationÍ}Íµ‘K¯ImportSpecifierÍ†Í‘LªIdentifierÍ†Í‘«AdjustPanelLªIdentifierÍ†Í‘«AdjustPanelM§LiteralÍ™Í´¹../components/AdjustPanel»'../components/AdjustPanel'J±ImportDeclarationÍ·Íò‘K¯ImportSpecifierÍÀÍÏLªIdentifierÍÀÍÏ¯ImagePickerUtilLªIdentifierÍÀÍÏ¯ImagePickerUtilM§LiteralÍ×Íñ¸../utils/ImagePickerUtilº'../utils/ImagePickerUtil'
