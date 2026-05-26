@@ -2,6 +2,9 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 interface SplashPage_Params {
+    deviceType?: DeviceType;
+    screenWidth?: number;
+    screenHeight?: number;
     logoScale?: number;
     logoOpacity?: number;
     titleOpacity?: number;
@@ -15,12 +18,17 @@ interface SplashPage_Params {
     bgGradientOffset?: number;
 }
 import router from "@ohos:router";
+import display from "@ohos:display";
+import { DeviceHelper, DeviceType } from "@normalized:N&&&entry/src/main/ets/utils/DeviceHelper&";
 class SplashPage extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
+        this.__deviceType = new ObservedPropertySimplePU(DeviceType.PHONE, this, "deviceType");
+        this.__screenWidth = new ObservedPropertySimplePU(360, this, "screenWidth");
+        this.__screenHeight = new ObservedPropertySimplePU(640, this, "screenHeight");
         this.__logoScale = new ObservedPropertySimplePU(0.3, this, "logoScale");
         this.__logoOpacity = new ObservedPropertySimplePU(0, this, "logoOpacity");
         this.__titleOpacity = new ObservedPropertySimplePU(0, this, "titleOpacity");
@@ -36,6 +44,15 @@ class SplashPage extends ViewPU {
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params: SplashPage_Params) {
+        if (params.deviceType !== undefined) {
+            this.deviceType = params.deviceType;
+        }
+        if (params.screenWidth !== undefined) {
+            this.screenWidth = params.screenWidth;
+        }
+        if (params.screenHeight !== undefined) {
+            this.screenHeight = params.screenHeight;
+        }
         if (params.logoScale !== undefined) {
             this.logoScale = params.logoScale;
         }
@@ -73,6 +90,9 @@ class SplashPage extends ViewPU {
     updateStateVars(params: SplashPage_Params) {
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__deviceType.purgeDependencyOnElmtId(rmElmtId);
+        this.__screenWidth.purgeDependencyOnElmtId(rmElmtId);
+        this.__screenHeight.purgeDependencyOnElmtId(rmElmtId);
         this.__logoScale.purgeDependencyOnElmtId(rmElmtId);
         this.__logoOpacity.purgeDependencyOnElmtId(rmElmtId);
         this.__titleOpacity.purgeDependencyOnElmtId(rmElmtId);
@@ -86,6 +106,9 @@ class SplashPage extends ViewPU {
         this.__bgGradientOffset.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
+        this.__deviceType.aboutToBeDeleted();
+        this.__screenWidth.aboutToBeDeleted();
+        this.__screenHeight.aboutToBeDeleted();
         this.__logoScale.aboutToBeDeleted();
         this.__logoOpacity.aboutToBeDeleted();
         this.__titleOpacity.aboutToBeDeleted();
@@ -99,6 +122,28 @@ class SplashPage extends ViewPU {
         this.__bgGradientOffset.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
+    }
+    // 设备类型和屏幕尺寸
+    private __deviceType: ObservedPropertySimplePU<DeviceType>;
+    get deviceType() {
+        return this.__deviceType.get();
+    }
+    set deviceType(newValue: DeviceType) {
+        this.__deviceType.set(newValue);
+    }
+    private __screenWidth: ObservedPropertySimplePU<number>;
+    get screenWidth() {
+        return this.__screenWidth.get();
+    }
+    set screenWidth(newValue: number) {
+        this.__screenWidth.set(newValue);
+    }
+    private __screenHeight: ObservedPropertySimplePU<number>;
+    get screenHeight() {
+        return this.__screenHeight.get();
+    }
+    set screenHeight(newValue: number) {
+        this.__screenHeight.set(newValue);
     }
     // Logo缩放动画状态
     private __logoScale: ObservedPropertySimplePU<number>;
@@ -184,8 +229,23 @@ class SplashPage extends ViewPU {
         this.__bgGradientOffset.set(newValue);
     }
     aboutToAppear(): void {
+        // 获取屏幕尺寸并设置设备类型
+        this.updateScreenInfo();
         // 启动动画序列
         this.startAnimationSequence();
+    }
+    // 更新屏幕信息
+    private updateScreenInfo(): void {
+        try {
+            const displayInfo = display.getDefaultDisplaySync();
+            this.screenWidth = px2vp(displayInfo.width);
+            this.screenHeight = px2vp(displayInfo.height);
+            this.deviceType = DeviceHelper.getDeviceType(this.screenWidth);
+        }
+        catch (error) {
+            // 使用默认值
+            this.deviceType = DeviceType.PHONE;
+        }
     }
     // 启动动画序列
     private startAnimationSequence(): void {
@@ -416,17 +476,17 @@ class SplashPage extends ViewPU {
             // Logo图标 - 使用滤镜图标设计
             Stack.create();
             // Logo图标 - 使用滤镜图标设计
-            Stack.width(140);
+            Stack.width(DeviceHelper.getSplashLogoSize(this.deviceType));
             // Logo图标 - 使用滤镜图标设计
-            Stack.height(140);
+            Stack.height(DeviceHelper.getSplashLogoSize(this.deviceType));
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 外圈光晕
             Circle.create();
             // 外圈光晕
-            Circle.width(140);
+            Circle.width(DeviceHelper.getSplashLogoSize(this.deviceType));
             // 外圈光晕
-            Circle.height(140);
+            Circle.height(DeviceHelper.getSplashLogoSize(this.deviceType));
             // 外圈光晕
             Circle.fill('rgba(255, 255, 255, 0.15)');
             // 外圈光晕
@@ -436,9 +496,9 @@ class SplashPage extends ViewPU {
             // 主Logo容器
             Column.create();
             // 主Logo容器
-            Column.width(120);
+            Column.width(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.85);
             // 主Logo容器
-            Column.height(120);
+            Column.height(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.85);
             // 主Logo容器
             Column.justifyContent(FlexAlign.Center);
             // 主Logo容器
@@ -448,9 +508,9 @@ class SplashPage extends ViewPU {
             // 滤镜图标 - 三层叠加效果
             Stack.create();
             // 滤镜图标 - 三层叠加效果
-            Stack.width(100);
+            Stack.width(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.7);
             // 滤镜图标 - 三层叠加效果
-            Stack.height(100);
+            Stack.height(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.7);
             // 滤镜图标 - 三层叠加效果
             Stack.alignContent(Alignment.Center);
         }, Stack);
@@ -458,9 +518,9 @@ class SplashPage extends ViewPU {
             // 底层 - 模拟滤镜层
             Rect.create();
             // 底层 - 模拟滤镜层
-            Rect.width(70);
+            Rect.width(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5);
             // 底层 - 模拟滤镜层
-            Rect.height(70);
+            Rect.height(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5);
             // 底层 - 模拟滤镜层
             Rect.radius(12);
             // 底层 - 模拟滤镜层
@@ -472,9 +532,9 @@ class SplashPage extends ViewPU {
             // 中层
             Rect.create();
             // 中层
-            Rect.width(70);
+            Rect.width(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5);
             // 中层
-            Rect.height(70);
+            Rect.height(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5);
             // 中层
             Rect.radius(12);
             // 中层
@@ -486,9 +546,9 @@ class SplashPage extends ViewPU {
             // 顶层 - 主图标
             Rect.create();
             // 顶层 - 主图标
-            Rect.width(70);
+            Rect.width(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5);
             // 顶层 - 主图标
-            Rect.height(70);
+            Rect.height(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5);
             // 顶层 - 主图标
             Rect.radius(12);
             // 顶层 - 主图标
@@ -500,7 +560,7 @@ class SplashPage extends ViewPU {
             // 滤镜符号
             Text.create('✦');
             // 滤镜符号
-            Text.fontSize(40);
+            Text.fontSize(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.28);
             // 滤镜符号
             Text.fontColor('#764ba2');
             // 滤镜符号
@@ -528,7 +588,7 @@ class SplashPage extends ViewPU {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('Image Filter');
-            Text.fontSize(38);
+            Text.fontSize(DeviceHelper.getSplashTitleSize(this.deviceType));
             Text.fontWeight(FontWeight.Bold);
             Text.fontColor('#ffffff');
             Text.textShadow({
@@ -543,7 +603,7 @@ class SplashPage extends ViewPU {
             // 副标题
             Text.create('专业图像滤镜处理工具');
             // 副标题
-            Text.fontSize(16);
+            Text.fontSize(DeviceHelper.getSplashTitleSize(this.deviceType) * 0.42);
             // 副标题
             Text.fontColor('rgba(255, 255, 255, 0.85)');
             // 副标题

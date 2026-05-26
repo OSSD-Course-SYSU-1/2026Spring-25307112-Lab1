@@ -14,10 +14,12 @@
  */
 
 import { AdjustParams, DEFAULT_ADJUST_PARAMS, PARAM_SLIDERS, ParamSliderConfig } from '../constants/CommonConstants';
+import { DeviceHelper, DeviceType } from '../utils/DeviceHelper';
 
 /**
  * Parameter adjustment panel component
  * Provides sliders for adjusting image parameters like brightness, contrast, saturation, etc.
+ * 支持多端适配，在不同设备上自动调整布局
  */
 @Component
 export struct AdjustPanel {
@@ -30,6 +32,9 @@ export struct AdjustPanel {
   @Link exposureValue: number;
   @Link gammaValue: number;
   
+  // 设备类型
+  @Prop deviceType: DeviceType = DeviceType.PHONE;
+  
   // Callback for reset
   onReset?: () => void;
   
@@ -39,9 +44,9 @@ export struct AdjustPanel {
       Row() {
         Row() {
           Text('⚙️ ')
-            .fontSize(20)
+            .fontSize(20 * DeviceHelper.getFontScaleFactor(this.deviceType))
           Text("参数调整")
-            .fontSize(20)
+            .fontSize(20 * DeviceHelper.getFontScaleFactor(this.deviceType))
             .fontWeight(FontWeight.Bold)
             .fontColor('#2d3748')
         }
@@ -52,10 +57,10 @@ export struct AdjustPanel {
         Button() {
           Row() {
             Text('↺')
-              .fontSize(16)
+              .fontSize(16 * DeviceHelper.getFontScaleFactor(this.deviceType))
               .fontColor('#ffffff')
             Text('重置')
-              .fontSize(13)
+              .fontSize(13 * DeviceHelper.getFontScaleFactor(this.deviceType))
               .fontColor('#ffffff')
               .fontWeight(FontWeight.Medium)
               .margin({ left: 4 })
@@ -69,7 +74,7 @@ export struct AdjustPanel {
           ]
         })
         .borderRadius(18)
-        .height(36)
+        .height(36 * DeviceHelper.getSpacingScaleFactor(this.deviceType))
         .padding({ left: 16, right: 16 })
         .shadow({
           radius: 8,
@@ -86,95 +91,207 @@ export struct AdjustPanel {
       .width('100%')
       .margin({ bottom: 20 })
       
-      // Scrollable slider list
+      // Scrollable slider list - 响应式网格布局
       Scroll() {
-        Column() {
-          // Brightness - 亮度
-          this.SliderItem(
-            '💡',
-            '亮度',
-            this.brightnessValue,
-            0,
-            200,
-            (newValue: number) => {
-              this.brightnessValue = Math.round(newValue);
+        // 根据设备类型选择布局方式
+        if (DeviceHelper.isHorizontalLayout(this.deviceType)) {
+          // 平板/大屏：网格布局
+          Grid() {
+            // Brightness - 亮度
+            GridItem() {
+              this.SliderItem(
+                '💡',
+                '亮度',
+                this.brightnessValue,
+                0,
+                200,
+                (newValue: number) => {
+                  this.brightnessValue = Math.round(newValue);
+                }
+              )
             }
-          )
-          
-          // Contrast - 对比度
-          this.SliderItem(
-            '🔲',
-            '对比度',
-            this.contrastValue,
-            0,
-            200,
-            (newValue: number) => {
-              this.contrastValue = Math.round(newValue);
+            
+            // Contrast - 对比度
+            GridItem() {
+              this.SliderItem(
+                '🔲',
+                '对比度',
+                this.contrastValue,
+                0,
+                200,
+                (newValue: number) => {
+                  this.contrastValue = Math.round(newValue);
+                }
+              )
             }
-          )
-          
-          // Saturation - 饱和度
-          this.SliderItem(
-            '🎨',
-            '饱和度',
-            this.saturationValue,
-            0,
-            200,
-            (newValue: number) => {
-              this.saturationValue = Math.round(newValue);
+            
+            // Saturation - 饱和度
+            GridItem() {
+              this.SliderItem(
+                '🎨',
+                '饱和度',
+                this.saturationValue,
+                0,
+                200,
+                (newValue: number) => {
+                  this.saturationValue = Math.round(newValue);
+                }
+              )
             }
-          )
-          
-          // Hue - 色相
-          this.SliderItem(
-            '🌈',
-            '色相',
-            this.hueValue,
-            0,
-            360,
-            (newValue: number) => {
-              this.hueValue = Math.round(newValue);
-            },
-            '°'
-          )
-          
-          // Warmth - 色温
-          this.SliderItem(
-            '🌡️',
-            '色温',
-            this.warmthValue,
-            0,
-            200,
-            (newValue: number) => {
-              this.warmthValue = Math.round(newValue);
+            
+            // Hue - 色相
+            GridItem() {
+              this.SliderItem(
+                '🌈',
+                '色相',
+                this.hueValue,
+                0,
+                360,
+                (newValue: number) => {
+                  this.hueValue = Math.round(newValue);
+                },
+                '°'
+              )
             }
-          )
-          
-          // Exposure - 曝光
-          this.SliderItem(
-            '☀️',
-            '曝光',
-            this.exposureValue,
-            0,
-            200,
-            (newValue: number) => {
-              this.exposureValue = Math.round(newValue);
+            
+            // Warmth - 色温
+            GridItem() {
+              this.SliderItem(
+                '🌡️',
+                '色温',
+                this.warmthValue,
+                0,
+                200,
+                (newValue: number) => {
+                  this.warmthValue = Math.round(newValue);
+                }
+              )
             }
-          )
-          
-          // Gamma - 伽马
-          this.SliderItem(
-            '📊',
-            '伽马',
-            this.gammaValue,
-            0,
-            200,
-            (newValue: number) => {
-              this.gammaValue = Math.round(newValue);
+            
+            // Exposure - 曝光
+            GridItem() {
+              this.SliderItem(
+                '☀️',
+                '曝光',
+                this.exposureValue,
+                0,
+                200,
+                (newValue: number) => {
+                  this.exposureValue = Math.round(newValue);
+                }
+              )
             }
-          )
+            
+            // Gamma - 伽马
+            GridItem() {
+              this.SliderItem(
+                '📊',
+                '伽马',
+                this.gammaValue,
+                0,
+                200,
+                (newValue: number) => {
+                  this.gammaValue = Math.round(newValue);
+                }
+              )
+            }
+          }
+          .columnsTemplate(this.getParamGridColumnsTemplate())
+          .rowsGap(16)
+          .columnsGap(16)
+          .width('100%')
+          .scrollBar(BarState.Off)
+          .edgeEffect(EdgeEffect.Spring)
+        } else {
+          // 手机：单列布局
+          Column() {
+            // Brightness - 亮度
+            this.SliderItem(
+              '💡',
+              '亮度',
+              this.brightnessValue,
+              0,
+              200,
+              (newValue: number) => {
+                this.brightnessValue = Math.round(newValue);
+              }
+            )
+            
+            // Contrast - 对比度
+            this.SliderItem(
+              '🔲',
+              '对比度',
+              this.contrastValue,
+              0,
+              200,
+              (newValue: number) => {
+                this.contrastValue = Math.round(newValue);
+              }
+            )
+            
+            // Saturation - 饱和度
+            this.SliderItem(
+              '🎨',
+              '饱和度',
+              this.saturationValue,
+              0,
+              200,
+              (newValue: number) => {
+                this.saturationValue = Math.round(newValue);
+              }
+            )
+            
+            // Hue - 色相
+            this.SliderItem(
+              '🌈',
+              '色相',
+              this.hueValue,
+              0,
+              360,
+              (newValue: number) => {
+                this.hueValue = Math.round(newValue);
+              },
+              '°'
+            )
+            
+            // Warmth - 色温
+            this.SliderItem(
+              '🌡️',
+              '色温',
+              this.warmthValue,
+              0,
+              200,
+              (newValue: number) => {
+                this.warmthValue = Math.round(newValue);
+              }
+            )
+            
+            // Exposure - 曝光
+            this.SliderItem(
+              '☀️',
+              '曝光',
+              this.exposureValue,
+              0,
+              200,
+              (newValue: number) => {
+                this.exposureValue = Math.round(newValue);
+              }
+            )
+            
+            // Gamma - 伽马
+            this.SliderItem(
+              '📊',
+              '伽马',
+              this.gammaValue,
+              0,
+              200,
+              (newValue: number) => {
+                this.gammaValue = Math.round(newValue);
+              }
+            )
+          }
+          .width('100%')
         }
-        .width('100%')
       }
       .width('100%')
       .layoutWeight(1)
@@ -183,7 +300,7 @@ export struct AdjustPanel {
     }
     .width('100%')
     .height('100%')
-    .padding(24)
+    .padding(24 * DeviceHelper.getSpacingScaleFactor(this.deviceType))
     .backgroundColor('#ffffff')
     .borderRadius(24)
     .shadow({
@@ -192,6 +309,12 @@ export struct AdjustPanel {
       offsetX: 0,
       offsetY: 8
     })
+  }
+  
+  // 获取参数网格列模板
+  private getParamGridColumnsTemplate(): string {
+    const columns = DeviceHelper.getParamGridColumns(this.deviceType);
+    return '1fr '.repeat(columns).trim();
   }
   
   // 美化的滑块项组件
@@ -211,9 +334,9 @@ export struct AdjustPanel {
         // 图标和标签
         Row() {
           Text(icon)
-            .fontSize(18)
+            .fontSize(18 * DeviceHelper.getFontScaleFactor(this.deviceType))
           Text(label)
-            .fontSize(14)
+            .fontSize(14 * DeviceHelper.getFontScaleFactor(this.deviceType))
             .fontColor('#4a5568')
             .fontWeight(FontWeight.Medium)
             .margin({ left: 6 })
@@ -224,7 +347,7 @@ export struct AdjustPanel {
         // 数值显示 - 带背景卡片
         Row() {
           Text(`${Math.round(value)}${unit}`)
-            .fontSize(14)
+            .fontSize(14 * DeviceHelper.getFontScaleFactor(this.deviceType))
             .fontColor('#667eea')
             .fontWeight(FontWeight.Bold)
         }
@@ -278,6 +401,9 @@ export struct AdjustPanel {
         .onChange(onChange)
     }
     .width('100%')
-    .padding({ top: 12, bottom: 12 })
+    .padding({ 
+      top: 12 * DeviceHelper.getSpacingScaleFactor(this.deviceType), 
+      bottom: 12 * DeviceHelper.getSpacingScaleFactor(this.deviceType) 
+    })
   }
 }

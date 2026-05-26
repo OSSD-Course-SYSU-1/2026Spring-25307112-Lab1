@@ -3,6 +3,9 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 interface Index_Params {
     context?: common.UIAbilityContext;
+    deviceType?: DeviceType;
+    screenWidth?: number;
+    screenHeight?: number;
     currentSwiperIndex?: number;
     imageList?: Array<ImageSource>;
     imageFilterTags?: Array<string>;
@@ -16,7 +19,6 @@ interface Index_Params {
     currentExposure?: number;
     currentGamma?: number;
     scrollOffset?: number;
-    MAX_IMAGE_HEIGHT?: number;
     MIN_IMAGE_HEIGHT?: number;
     IMAGE_SHRINK_RANGE?: number;
     scroller?: Scroller;
@@ -25,7 +27,9 @@ import { CAROUSEL_DATA_SOURCE, FILTER_OPTIONS, ORIGINAL_MATRIX, DEFAULT_ADJUST_P
 import type { FilterOption, AdjustParams } from "@normalized:N&&&entry/src/main/ets/constants/CommonConstants&";
 import { AdjustPanel } from "@normalized:N&&&entry/src/main/ets/components/AdjustPanel&";
 import { ImagePickerUtil } from "@normalized:N&&&entry/src/main/ets/utils/ImagePickerUtil&";
+import { DeviceHelper, DeviceType } from "@normalized:N&&&entry/src/main/ets/utils/DeviceHelper&";
 import type common from "@ohos:app.ability.common";
+import display from "@ohos:display";
 // Edit mode type
 type EditMode = 'preset' | 'adjust';
 // Image source type - can be Resource or file URI string
@@ -37,6 +41,9 @@ class Index extends ViewPU {
             this.paramsGenerator_ = paramsLambda;
         }
         this.context = getContext(this) as common.UIAbilityContext;
+        this.__deviceType = new ObservedPropertySimplePU(DeviceType.PHONE, this, "deviceType");
+        this.__screenWidth = new ObservedPropertySimplePU(360, this, "screenWidth");
+        this.__screenHeight = new ObservedPropertySimplePU(640, this, "screenHeight");
         this.__currentSwiperIndex = new ObservedPropertySimplePU(0, this, "currentSwiperIndex");
         this.__imageList = new ObservedPropertyObjectPU([], this, "imageList");
         this.__imageFilterTags = new ObservedPropertyObjectPU([], this, "imageFilterTags");
@@ -50,7 +57,6 @@ class Index extends ViewPU {
         this.__currentExposure = new ObservedPropertySimplePU(DEFAULT_ADJUST_PARAMS.exposure, this, "currentExposure");
         this.__currentGamma = new ObservedPropertySimplePU(DEFAULT_ADJUST_PARAMS.gamma, this, "currentGamma");
         this.__scrollOffset = new ObservedPropertySimplePU(0, this, "scrollOffset");
-        this.MAX_IMAGE_HEIGHT = 320;
         this.MIN_IMAGE_HEIGHT = 160;
         this.IMAGE_SHRINK_RANGE = 160;
         this.scroller = new Scroller();
@@ -60,6 +66,15 @@ class Index extends ViewPU {
     setInitiallyProvidedValue(params: Index_Params) {
         if (params.context !== undefined) {
             this.context = params.context;
+        }
+        if (params.deviceType !== undefined) {
+            this.deviceType = params.deviceType;
+        }
+        if (params.screenWidth !== undefined) {
+            this.screenWidth = params.screenWidth;
+        }
+        if (params.screenHeight !== undefined) {
+            this.screenHeight = params.screenHeight;
         }
         if (params.currentSwiperIndex !== undefined) {
             this.currentSwiperIndex = params.currentSwiperIndex;
@@ -100,9 +115,6 @@ class Index extends ViewPU {
         if (params.scrollOffset !== undefined) {
             this.scrollOffset = params.scrollOffset;
         }
-        if (params.MAX_IMAGE_HEIGHT !== undefined) {
-            this.MAX_IMAGE_HEIGHT = params.MAX_IMAGE_HEIGHT;
-        }
         if (params.MIN_IMAGE_HEIGHT !== undefined) {
             this.MIN_IMAGE_HEIGHT = params.MIN_IMAGE_HEIGHT;
         }
@@ -116,6 +128,9 @@ class Index extends ViewPU {
     updateStateVars(params: Index_Params) {
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__deviceType.purgeDependencyOnElmtId(rmElmtId);
+        this.__screenWidth.purgeDependencyOnElmtId(rmElmtId);
+        this.__screenHeight.purgeDependencyOnElmtId(rmElmtId);
         this.__currentSwiperIndex.purgeDependencyOnElmtId(rmElmtId);
         this.__imageList.purgeDependencyOnElmtId(rmElmtId);
         this.__imageFilterTags.purgeDependencyOnElmtId(rmElmtId);
@@ -131,6 +146,9 @@ class Index extends ViewPU {
         this.__scrollOffset.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
+        this.__deviceType.aboutToBeDeleted();
+        this.__screenWidth.aboutToBeDeleted();
+        this.__screenHeight.aboutToBeDeleted();
         this.__currentSwiperIndex.aboutToBeDeleted();
         this.__imageList.aboutToBeDeleted();
         this.__imageFilterTags.aboutToBeDeleted();
@@ -149,6 +167,28 @@ class Index extends ViewPU {
     }
     // Get context for image picker
     private context: common.UIAbilityContext;
+    // 设备适配相关
+    private __deviceType: ObservedPropertySimplePU<DeviceType>;
+    get deviceType() {
+        return this.__deviceType.get();
+    }
+    set deviceType(newValue: DeviceType) {
+        this.__deviceType.set(newValue);
+    }
+    private __screenWidth: ObservedPropertySimplePU<number>;
+    get screenWidth() {
+        return this.__screenWidth.get();
+    }
+    set screenWidth(newValue: number) {
+        this.__screenWidth.set(newValue);
+    }
+    private __screenHeight: ObservedPropertySimplePU<number>;
+    get screenHeight() {
+        return this.__screenHeight.get();
+    }
+    set screenHeight(newValue: number) {
+        this.__screenHeight.set(newValue);
+    }
     // Tracks the current index of the Swiper
     private __currentSwiperIndex: ObservedPropertySimplePU<number>;
     get currentSwiperIndex() {
@@ -247,14 +287,15 @@ class Index extends ViewPU {
     set scrollOffset(newValue: number) {
         this.__scrollOffset.set(newValue);
     }
-    // Image height constraints
-    private readonly MAX_IMAGE_HEIGHT: number; // Maximum image height
+    // Image height constraints - 将根据设备类型动态计算
     private readonly MIN_IMAGE_HEIGHT: number; // Minimum image height when sticky
     private readonly IMAGE_SHRINK_RANGE: number; // Range for image to shrink (MAX - MIN)
     // Scroller controller
     private scroller: Scroller;
     // [Start aboutToAppear]
     aboutToAppear(): void {
+        // 获取屏幕尺寸并设置设备类型
+        this.updateScreenInfo();
         // Initialize with default images from resources
         this.imageList = [...CAROUSEL_DATA_SOURCE];
         // Initialize all images to 'original' filter.
@@ -263,6 +304,19 @@ class Index extends ViewPU {
         this.initAdjustParams();
     }
     // [End aboutToAppear]
+    // 更新屏幕信息
+    private updateScreenInfo(): void {
+        try {
+            const displayInfo = display.getDefaultDisplaySync();
+            this.screenWidth = px2vp(displayInfo.width);
+            this.screenHeight = px2vp(displayInfo.height);
+            this.deviceType = DeviceHelper.getDeviceType(this.screenWidth);
+        }
+        catch (error) {
+            // 使用默认值
+            this.deviceType = DeviceType.PHONE;
+        }
+    }
     // Initialize adjustment parameters array
     private initAdjustParams(): void {
         const defaultParams: AdjustParams = {
@@ -316,15 +370,16 @@ class Index extends ViewPU {
             };
         }
     }
-    // Calculate dynamic image height based on scroll offset
+    // Calculate dynamic image height based on scroll offset and device type
     private calculateImageHeight(): number {
+        const maxHeight = DeviceHelper.getImageCarouselHeight(this.deviceType, this.screenHeight);
         if (this.scrollOffset <= 0) {
-            return this.MAX_IMAGE_HEIGHT;
+            return maxHeight;
         }
         // Calculate shrink progress (0 to 1)
         const shrinkProgress = Math.min(this.scrollOffset / this.IMAGE_SHRINK_RANGE, 1);
         // Linear interpolation between MAX and MIN
-        const height = this.MAX_IMAGE_HEIGHT - (this.MAX_IMAGE_HEIGHT - this.MIN_IMAGE_HEIGHT) * shrinkProgress;
+        const height = maxHeight - (maxHeight - this.MIN_IMAGE_HEIGHT) * shrinkProgress;
         return Math.max(height, this.MIN_IMAGE_HEIGHT);
     }
     initialRender() {
@@ -335,23 +390,23 @@ class Index extends ViewPU {
             Stack.expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM]);
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // 底层：渐变背景
+            // 底层：渐变背景 - 使用清爽的浅色渐变
             Column.create();
-            // 底层：渐变背景
+            // 底层：渐变背景 - 使用清爽的浅色渐变
             Column.width('100%');
-            // 底层：渐变背景
+            // 底层：渐变背景 - 使用清爽的浅色渐变
             Column.height('100%');
-            // 底层：渐变背景
+            // 底层：渐变背景 - 使用清爽的浅色渐变
             Column.linearGradient({
                 angle: 180,
                 colors: [
-                    ['#f8f9fa', 0.0],
-                    ['#e9ecef', 0.5],
-                    ['#dee2e6', 1.0]
+                    ['#f0f4ff', 0.0],
+                    ['#e8eeff', 0.5],
+                    ['#f5f7ff', 1.0]
                 ]
             });
         }, Column);
-        // 底层：渐变背景
+        // 底层：渐变背景 - 使用清爽的浅色渐变
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 中层：滚动内容区域（参数调整区域）
@@ -479,6 +534,10 @@ class Index extends ViewPU {
             // Bottom Section: Control Panel
             Column.width('100%');
             // Bottom Section: Control Panel
+            Column.constraintSize({
+                maxWidth: DeviceHelper.getContentMaxWidth(this.deviceType)
+            });
+            // Bottom Section: Control Panel
             Column.padding({ left: 16, right: 16, bottom: 16 });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -504,10 +563,11 @@ class Index extends ViewPU {
                                     warmthValue: this.__currentWarmth,
                                     exposureValue: this.__currentExposure,
                                     gammaValue: this.__currentGamma,
+                                    deviceType: this.deviceType,
                                     onReset: () => {
                                         this.resetCurrentParams();
                                     }
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 235, col: 15 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 259, col: 15 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -518,6 +578,7 @@ class Index extends ViewPU {
                                         warmthValue: this.currentWarmth,
                                         exposureValue: this.currentExposure,
                                         gammaValue: this.currentGamma,
+                                        deviceType: this.deviceType,
                                         onReset: () => {
                                             this.resetCurrentParams();
                                         }
@@ -526,7 +587,9 @@ class Index extends ViewPU {
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    deviceType: this.deviceType
+                                });
                             }
                         }, { name: "AdjustPanel" });
                     }
@@ -548,10 +611,12 @@ class Index extends ViewPU {
             Column.linearGradient({
                 angle: 180,
                 colors: [
-                    ['rgba(255, 255, 255, 0.98)', 0.0],
-                    ['rgba(255, 255, 255, 0.95)', 1.0]
+                    ['rgba(240, 244, 255, 0.98)', 0.0],
+                    ['rgba(232, 238, 255, 0.95)', 1.0]
                 ]
             });
+            // 顶层：固定的图片区域（吸顶效果）
+            Column.borderRadius({ bottomLeft: 32, bottomRight: 32 });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // Top status bar area - 渐变背景
@@ -635,20 +700,26 @@ class Index extends ViewPU {
                     Stack.create();
                 }, Stack);
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                    // 图片阴影层
+                    // 图片背景层 - 使用浅蓝色背景，与整体背景呼应
                     Column.create();
-                    // 图片阴影层
+                    // 图片背景层 - 使用浅蓝色背景，与整体背景呼应
                     Column.width('100%');
-                    // 图片阴影层
+                    // 图片背景层 - 使用浅蓝色背景，与整体背景呼应
                     Column.height('100%');
-                    // 图片阴影层
-                    Column.backgroundColor('rgba(0, 0, 0, 0.1)');
-                    // 图片阴影层
+                    // 图片背景层 - 使用浅蓝色背景，与整体背景呼应
+                    Column.linearGradient({
+                        angle: 180,
+                        colors: [
+                            ['rgba(240, 244, 255, 0.95)', 0.0],
+                            ['rgba(232, 238, 255, 0.95)', 1.0]
+                        ]
+                    });
+                    // 图片背景层 - 使用浅蓝色背景，与整体背景呼应
                     Column.blur(20);
-                    // 图片阴影层
+                    // 图片背景层 - 使用浅蓝色背景，与整体背景呼应
                     Column.offset({ y: 10 });
                 }, Column);
-                // 图片阴影层
+                // 图片背景层 - 使用浅蓝色背景，与整体背景呼应
                 Column.pop();
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                     // 主图片
@@ -778,7 +849,7 @@ class Index extends ViewPU {
             Column.create();
             Column.width('100%');
             Column.height('100%');
-            Column.padding(24);
+            Column.padding(24 * DeviceHelper.getSpacingScaleFactor(this.deviceType));
             Column.backgroundColor('#ffffff');
             Column.borderRadius(24);
             Column.shadow({
@@ -798,7 +869,7 @@ class Index extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('✨ 应用滤镜');
-            Text.fontSize(20);
+            Text.fontSize(20 * DeviceHelper.getFontScaleFactor(this.deviceType));
             Text.fontWeight(FontWeight.Bold);
             Text.fontColor('#2d3748');
         }, Text);
@@ -811,7 +882,7 @@ class Index extends ViewPU {
             // 当前滤镜指示
             Text.create(this.getCurrentFilterName());
             // 当前滤镜指示
-            Text.fontSize(12);
+            Text.fontSize(12 * DeviceHelper.getFontScaleFactor(this.deviceType));
             // 当前滤镜指示
             Text.fontColor('#667eea');
             // 当前滤镜指示
@@ -831,11 +902,11 @@ class Index extends ViewPU {
             // [Start radioUsagePosition]
             Grid.create();
             // [Start radioUsagePosition]
-            Grid.columnsTemplate('1fr 1fr 1fr');
+            Grid.columnsTemplate(this.getFilterGridColumnsTemplate());
             // [Start radioUsagePosition]
-            Grid.rowsGap(16);
+            Grid.rowsGap(16 * DeviceHelper.getSpacingScaleFactor(this.deviceType));
             // [Start radioUsagePosition]
-            Grid.columnsGap(12);
+            Grid.columnsGap(12 * DeviceHelper.getSpacingScaleFactor(this.deviceType));
             // [Start radioUsagePosition]
             Grid.width('100%');
             // [Start radioUsagePosition]
@@ -865,7 +936,7 @@ class Index extends ViewPU {
                             // 滤镜选项卡片
                             Column.width('100%');
                             // 滤镜选项卡片
-                            Column.height(80);
+                            Column.height(80 * DeviceHelper.getSpacingScaleFactor(this.deviceType));
                             // 滤镜选项卡片
                             Column.justifyContent(FlexAlign.Center);
                             // 滤镜选项卡片
@@ -901,7 +972,7 @@ class Index extends ViewPU {
                             // 图标或装饰
                             Text.create(this.getFilterIcon(item.value));
                             // 图标或装饰
-                            Text.fontSize(24);
+                            Text.fontSize(24 * DeviceHelper.getFontScaleFactor(this.deviceType));
                             // 图标或装饰
                             Text.margin({ bottom: 8 });
                         }, Text);
@@ -911,7 +982,7 @@ class Index extends ViewPU {
                             // 滤镜名称
                             Text.create(item.label);
                             // 滤镜名称
-                            Text.fontSize(13);
+                            Text.fontSize(13 * DeviceHelper.getFontScaleFactor(this.deviceType));
                             // 滤镜名称
                             Text.fontColor(this.imageFilterTags[this.currentSwiperIndex] === item.value ? '#667eea' : '#4a5568');
                             // 滤镜名称
@@ -932,6 +1003,11 @@ class Index extends ViewPU {
         // [Start radioUsagePosition]
         Grid.pop();
         Column.pop();
+    }
+    // 获取滤镜网格列模板
+    private getFilterGridColumnsTemplate(): string {
+        const columns = DeviceHelper.getFilterGridColumns(this.deviceType);
+        return '1fr '.repeat(columns).trim();
     }
     // 获取当前滤镜名称
     private getCurrentFilterName(): string {

@@ -24,7 +24,9 @@ import {
 } from '../constants/CommonConstants';
 import { AdjustPanel } from '../components/AdjustPanel';
 import { ImagePickerUtil } from '../utils/ImagePickerUtil';
+import { DeviceHelper, DeviceType } from '../utils/DeviceHelper';
 import { common } from '@kit.AbilityKit';
+import { display } from '@kit.ArkUI';
 
 // Edit mode type
 type EditMode = 'preset' | 'adjust';
@@ -37,6 +39,11 @@ type ImageSource = Resource | string;
 struct Index {
   // Get context for image picker
   private context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
+  
+  // 设备适配相关
+  @State deviceType: DeviceType = DeviceType.PHONE;
+  @State screenWidth: number = 360;
+  @State screenHeight: number = 640;
   
   // Tracks the current index of the Swiper
   @State currentSwiperIndex: number = 0;
@@ -61,8 +68,7 @@ struct Index {
   // Scroll related states for sticky image effect
   @State scrollOffset: number = 0;
   
-  // Image height constraints
-  private readonly MAX_IMAGE_HEIGHT: number = 320; // Maximum image height
+  // Image height constraints - 将根据设备类型动态计算
   private readonly MIN_IMAGE_HEIGHT: number = 160; // Minimum image height when sticky
   private readonly IMAGE_SHRINK_RANGE: number = 160; // Range for image to shrink (MAX - MIN)
   
@@ -71,6 +77,9 @@ struct Index {
 
   // [Start aboutToAppear]
   aboutToAppear(): void {
+    // 获取屏幕尺寸并设置设备类型
+    this.updateScreenInfo();
+    
     // Initialize with default images from resources
     this.imageList = [...CAROUSEL_DATA_SOURCE];
     // Initialize all images to 'original' filter.
@@ -79,6 +88,19 @@ struct Index {
     this.initAdjustParams();
   }
   // [End aboutToAppear]
+  
+  // 更新屏幕信息
+  private updateScreenInfo(): void {
+    try {
+      const displayInfo = display.getDefaultDisplaySync();
+      this.screenWidth = px2vp(displayInfo.width);
+      this.screenHeight = px2vp(displayInfo.height);
+      this.deviceType = DeviceHelper.getDeviceType(this.screenWidth);
+    } catch (error) {
+      // 使用默认值
+      this.deviceType = DeviceType.PHONE;
+    }
+  }
 
   // Initialize adjustment parameters array
   private initAdjustParams(): void {
@@ -136,30 +158,32 @@ struct Index {
     }
   }
 
-  // Calculate dynamic image height based on scroll offset
+  // Calculate dynamic image height based on scroll offset and device type
   private calculateImageHeight(): number {
+    const maxHeight = DeviceHelper.getImageCarouselHeight(this.deviceType, this.screenHeight);
+    
     if (this.scrollOffset <= 0) {
-      return this.MAX_IMAGE_HEIGHT;
+      return maxHeight;
     }
     // Calculate shrink progress (0 to 1)
     const shrinkProgress = Math.min(this.scrollOffset / this.IMAGE_SHRINK_RANGE, 1);
     // Linear interpolation between MAX and MIN
-    const height = this.MAX_IMAGE_HEIGHT - (this.MAX_IMAGE_HEIGHT - this.MIN_IMAGE_HEIGHT) * shrinkProgress;
+    const height = maxHeight - (maxHeight - this.MIN_IMAGE_HEIGHT) * shrinkProgress;
     return Math.max(height, this.MIN_IMAGE_HEIGHT);
   }
 
   build() {
     Stack({ alignContent: Alignment.Top }) {
-      // 底层：渐变背景
+      // 底层：渐变背景 - 使用清爽的浅色渐变
       Column()
         .width('100%')
         .height('100%')
         .linearGradient({
           angle: 180,
           colors: [
-            ['#f8f9fa', 0.0],
-            ['#e9ecef', 0.5],
-            ['#dee2e6', 1.0]
+            ['#f0f4ff', 0.0],
+            ['#e8eeff', 0.5],
+            ['#f5f7ff', 1.0]
           ]
         })
       
@@ -240,6 +264,7 @@ struct Index {
                 warmthValue: $currentWarmth,
                 exposureValue: $currentExposure,
                 gammaValue: $currentGamma,
+                deviceType: this.deviceType,
                 onReset: () => {
                   this.resetCurrentParams();
                 }
@@ -247,6 +272,9 @@ struct Index {
             }
           }
           .width('100%')
+          .constraintSize({
+            maxWidth: DeviceHelper.getContentMaxWidth(this.deviceType)
+          })
           .padding({ left: 16, right: 16, bottom: 16 })
         }
         .width('100%')
@@ -289,11 +317,17 @@ struct Index {
               Column() {
                 // [Start imageUsagePosition]
                 Stack() {
-                  // 图片阴影层
+                  // 图片背景层 - 使用浅蓝色背景，与整体背景呼应
                   Column()
                     .width('100%')
                     .height('100%')
-                    .backgroundColor('rgba(0, 0, 0, 0.1)')
+                    .linearGradient({
+                      angle: 180,
+                      colors: [
+                        ['rgba(240, 244, 255, 0.95)', 0.0],
+                        ['rgba(232, 238, 255, 0.95)', 1.0]
+                      ]
+                    })
                     .blur(20)
                     .offset({ y: 10 })
                   
@@ -408,10 +442,11 @@ struct Index {
       .linearGradient({
         angle: 180,
         colors: [
-          ['rgba(255, 255, 255, 0.98)', 0.0],
-          ['rgba(255, 255, 255, 0.95)', 1.0]
+          ['rgba(240, 244, 255, 0.98)', 0.0],
+          ['rgba(232, 238, 255, 0.95)', 1.0]
         ]
       })
+      .borderRadius({ bottomLeft: 32, bottomRight: 32 })
     }
     .height('100%')
     .width('100%')
@@ -425,7 +460,7 @@ struct Index {
       // 标题栏
       Row() {
         Text('✨ 应用滤镜')
-          .fontSize(20)
+          .fontSize(20 * DeviceHelper.getFontScaleFactor(this.deviceType))
           .fontWeight(FontWeight.Bold)
           .fontColor('#2d3748')
         
@@ -433,7 +468,7 @@ struct Index {
         
         // 当前滤镜指示
         Text(this.getCurrentFilterName())
-          .fontSize(12)
+          .fontSize(12 * DeviceHelper.getFontScaleFactor(this.deviceType))
           .fontColor('#667eea')
           .fontWeight(FontWeight.Medium)
           .padding({ left: 12, right: 12, top: 6, bottom: 6 })
@@ -451,17 +486,17 @@ struct Index {
             Column() {
               // 图标或装饰
               Text(this.getFilterIcon(item.value))
-                .fontSize(24)
+                .fontSize(24 * DeviceHelper.getFontScaleFactor(this.deviceType))
                 .margin({ bottom: 8 })
               
               // 滤镜名称
               Text(item.label)
-                .fontSize(13)
+                .fontSize(13 * DeviceHelper.getFontScaleFactor(this.deviceType))
                 .fontColor(this.imageFilterTags[this.currentSwiperIndex] === item.value ? '#667eea' : '#4a5568')
                 .fontWeight(this.imageFilterTags[this.currentSwiperIndex] === item.value ? FontWeight.Bold : FontWeight.Medium)
             }
             .width('100%')
-            .height(80)
+            .height(80 * DeviceHelper.getSpacingScaleFactor(this.deviceType))
             .justifyContent(FlexAlign.Center)
             .alignItems(HorizontalAlign.Center)
             .backgroundColor(this.imageFilterTags[this.currentSwiperIndex] === item.value ? '#ffffff' : 'rgba(255, 255, 255, 0.6)')
@@ -491,9 +526,9 @@ struct Index {
           }
         }, (item: FilterOption, index: number) => index + '_' + JSON.stringify(item))
       }
-      .columnsTemplate('1fr 1fr 1fr')
-      .rowsGap(16)
-      .columnsGap(12)
+      .columnsTemplate(this.getFilterGridColumnsTemplate())
+      .rowsGap(16 * DeviceHelper.getSpacingScaleFactor(this.deviceType))
+      .columnsGap(12 * DeviceHelper.getSpacingScaleFactor(this.deviceType))
       .width('100%')
       .layoutWeight(1)
       .scrollBar(BarState.Off)
@@ -502,7 +537,7 @@ struct Index {
     }
     .width('100%')
     .height('100%')
-    .padding(24)
+    .padding(24 * DeviceHelper.getSpacingScaleFactor(this.deviceType))
     .backgroundColor('#ffffff')
     .borderRadius(24)
     .shadow({
@@ -511,6 +546,12 @@ struct Index {
       offsetX: 0,
       offsetY: 8
     })
+  }
+  
+  // 获取滤镜网格列模板
+  private getFilterGridColumnsTemplate(): string {
+    const columns = DeviceHelper.getFilterGridColumns(this.deviceType);
+    return '1fr '.repeat(columns).trim();
   }
   
   // 获取当前滤镜名称

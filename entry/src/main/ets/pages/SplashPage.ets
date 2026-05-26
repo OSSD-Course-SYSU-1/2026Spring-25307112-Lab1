@@ -13,15 +13,22 @@
  * limitations under the License.
  */
 
-import { router } from '@kit.ArkUI';
+import { router, display } from '@kit.ArkUI';
+import { DeviceHelper, DeviceType } from '../utils/DeviceHelper';
 
 /**
  * Splash Page - 精美的启动界面
  * 展示应用品牌形象，包含动画效果和加载指示器
+ * 支持多端适配，在不同设备上自动调整布局
  */
 @Entry
 @Component
 struct SplashPage {
+  // 设备类型和屏幕尺寸
+  @State deviceType: DeviceType = DeviceType.PHONE;
+  @State screenWidth: number = 360;
+  @State screenHeight: number = 640;
+  
   // Logo缩放动画状态
   @State logoScale: number = 0.3;
   @State logoOpacity: number = 0;
@@ -46,8 +53,24 @@ struct SplashPage {
   @State bgGradientOffset: number = 0;
 
   aboutToAppear(): void {
+    // 获取屏幕尺寸并设置设备类型
+    this.updateScreenInfo();
+    
     // 启动动画序列
     this.startAnimationSequence();
+  }
+  
+  // 更新屏幕信息
+  private updateScreenInfo(): void {
+    try {
+      const displayInfo = display.getDefaultDisplaySync();
+      this.screenWidth = px2vp(displayInfo.width);
+      this.screenHeight = px2vp(displayInfo.height);
+      this.deviceType = DeviceHelper.getDeviceType(this.screenWidth);
+    } catch (error) {
+      // 使用默认值
+      this.deviceType = DeviceType.PHONE;
+    }
   }
 
   // 启动动画序列
@@ -242,8 +265,8 @@ struct SplashPage {
           Stack() {
             // 外圈光晕
             Circle()
-              .width(140)
-              .height(140)
+              .width(DeviceHelper.getSplashLogoSize(this.deviceType))
+              .height(DeviceHelper.getSplashLogoSize(this.deviceType))
               .fill('rgba(255, 255, 255, 0.15)')
               .blur(20)
             
@@ -253,45 +276,45 @@ struct SplashPage {
               Stack() {
                 // 底层 - 模拟滤镜层
                 Rect()
-                  .width(70)
-                  .height(70)
+                  .width(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5)
+                  .height(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5)
                   .radius(12)
                   .fill('rgba(255, 255, 255, 0.3)')
                   .rotate({ angle: -15 })
                 
                 // 中层
                 Rect()
-                  .width(70)
-                  .height(70)
+                  .width(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5)
+                  .height(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5)
                   .radius(12)
                   .fill('rgba(255, 255, 255, 0.5)')
                   .rotate({ angle: 0 })
                 
                 // 顶层 - 主图标
                 Rect()
-                  .width(70)
-                  .height(70)
+                  .width(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5)
+                  .height(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.5)
                   .radius(12)
                   .fill('rgba(255, 255, 255, 0.95)')
                   .rotate({ angle: 15 })
                 
                 // 滤镜符号
                 Text('✦')
-                  .fontSize(40)
+                  .fontSize(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.28)
                   .fontColor('#764ba2')
                   .fontWeight(FontWeight.Bold)
               }
-              .width(100)
-              .height(100)
+              .width(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.7)
+              .height(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.7)
               .alignContent(Alignment.Center)
             }
-            .width(120)
-            .height(120)
+            .width(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.85)
+            .height(DeviceHelper.getSplashLogoSize(this.deviceType) * 0.85)
             .justifyContent(FlexAlign.Center)
             .alignItems(HorizontalAlign.Center)
           }
-          .width(140)
-          .height(140)
+          .width(DeviceHelper.getSplashLogoSize(this.deviceType))
+          .height(DeviceHelper.getSplashLogoSize(this.deviceType))
         }
         .scale({ x: this.logoScale, y: this.logoScale })
         .opacity(this.logoOpacity)
@@ -300,7 +323,7 @@ struct SplashPage {
         // 应用标题
         Column() {
           Text('Image Filter')
-            .fontSize(38)
+            .fontSize(DeviceHelper.getSplashTitleSize(this.deviceType))
             .fontWeight(FontWeight.Bold)
             .fontColor('#ffffff')
             .textShadow({
@@ -312,7 +335,7 @@ struct SplashPage {
           
           // 副标题
           Text('专业图像滤镜处理工具')
-            .fontSize(16)
+            .fontSize(DeviceHelper.getSplashTitleSize(this.deviceType) * 0.42)
             .fontColor('rgba(255, 255, 255, 0.85)')
             .margin({ top: 12 })
             .opacity(this.subtitleOpacity)
