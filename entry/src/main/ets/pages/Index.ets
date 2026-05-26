@@ -150,7 +150,20 @@ struct Index {
 
   build() {
     Stack({ alignContent: Alignment.Top }) {
-      // 底层：滚动内容区域（参数调整区域）
+      // 底层：渐变背景
+      Column()
+        .width('100%')
+        .height('100%')
+        .linearGradient({
+          angle: 180,
+          colors: [
+            ['#f8f9fa', 0.0],
+            ['#e9ecef', 0.5],
+            ['#dee2e6', 1.0]
+          ]
+        })
+      
+      // 中层：滚动内容区域（参数调整区域）
       Scroll(this.scroller) {
         Column() {
           // 占位区域，为顶部的图片区域留出空间
@@ -158,41 +171,59 @@ struct Index {
             .width('100%')
             .height(this.calculateImageHeight() + 100) // 图片高度 + 图片计数区域高度
           
-          // Mode Switch Tabs
+          // Mode Switch Tabs - 美化的标签切换
           Row() {
-            Text('预设滤镜')
-              .fontSize(16)
-              .fontWeight(this.editMode === 'preset' ? FontWeight.Bold : FontWeight.Normal)
-              .fontColor(this.editMode === 'preset' 
-                ? $r('sys.color.font_emphasize') 
-                : $r('sys.color.font_secondary'))
-              .padding({ left: 20, right: 20, top: 8, bottom: 8 })
-              .borderRadius(20)
-              .backgroundColor(this.editMode === 'preset' 
-                ? $r('sys.color.background_primary') 
-                : 'transparent')
-              .onClick(() => {
-                this.editMode = 'preset';
-              })
+            // 预设滤镜标签
+            Column() {
+              Text('🎨 预设滤镜')
+                .fontSize(15)
+                .fontWeight(this.editMode === 'preset' ? FontWeight.Bold : FontWeight.Medium)
+                .fontColor(this.editMode === 'preset' ? '#667eea' : '#8e9aaf')
+            }
+            .padding({ left: 24, right: 24, top: 12, bottom: 12 })
+            .borderRadius(24)
+            .backgroundColor(this.editMode === 'preset' ? '#ffffff' : 'transparent')
+            .shadow(this.editMode === 'preset' ? {
+              radius: 12,
+              color: 'rgba(102, 126, 234, 0.2)',
+              offsetX: 0,
+              offsetY: 4
+            } : { radius: 0, color: 'transparent', offsetX: 0, offsetY: 0 })
+            .onClick(() => {
+              this.editMode = 'preset';
+            })
+            .animation({
+              duration: 300,
+              curve: Curve.FastOutSlowIn
+            })
             
-            Text('参数调整')
-              .fontSize(16)
-              .fontWeight(this.editMode === 'adjust' ? FontWeight.Bold : FontWeight.Normal)
-              .fontColor(this.editMode === 'adjust' 
-                ? $r('sys.color.font_emphasize') 
-                : $r('sys.color.font_secondary'))
-              .padding({ left: 20, right: 20, top: 8, bottom: 8 })
-              .borderRadius(20)
-              .backgroundColor(this.editMode === 'adjust' 
-                ? $r('sys.color.background_primary') 
-                : 'transparent')
-              .onClick(() => {
-                this.editMode = 'adjust';
-              })
+            // 参数调整标签
+            Column() {
+              Text('⚙️ 参数调整')
+                .fontSize(15)
+                .fontWeight(this.editMode === 'adjust' ? FontWeight.Bold : FontWeight.Medium)
+                .fontColor(this.editMode === 'adjust' ? '#667eea' : '#8e9aaf')
+            }
+            .padding({ left: 24, right: 24, top: 12, bottom: 12 })
+            .borderRadius(24)
+            .backgroundColor(this.editMode === 'adjust' ? '#ffffff' : 'transparent')
+            .shadow(this.editMode === 'adjust' ? {
+              radius: 12,
+              color: 'rgba(102, 126, 234, 0.2)',
+              offsetX: 0,
+              offsetY: 4
+            } : { radius: 0, color: 'transparent', offsetX: 0, offsetY: 0 })
+            .onClick(() => {
+              this.editMode = 'adjust';
+            })
+            .animation({
+              duration: 300,
+              curve: Curve.FastOutSlowIn
+            })
           }
           .width('100%')
           .justifyContent(FlexAlign.Center)
-          .margin({ bottom: 8 })
+          .margin({ bottom: 16 })
           
           // Bottom Section: Control Panel
           Column() {
@@ -237,11 +268,17 @@ struct Index {
       
       // 顶层：固定的图片区域（吸顶效果）
       Column() {
-        // Top status bar area
+        // Top status bar area - 渐变背景
         Row()
           .width('100%')
           .height(45)
-          .backgroundColor($r('sys.color.background_secondary'))
+          .linearGradient({
+            angle: 90,
+            colors: [
+              ['rgba(102, 126, 234, 0.95)', 0.0],
+              ['rgba(118, 75, 162, 0.95)', 1.0]
+            ]
+          })
         
         // Image Carousel Section
         Column() {
@@ -251,13 +288,24 @@ struct Index {
               // Container needed for individual scale animation
               Column() {
                 // [Start imageUsagePosition]
-                Image(imgSource)
-                  .width('100%')
-                  .height('100%')
-                  .objectFit(ImageFit.Contain)
-                  .borderRadius(16)
-                  // Apply filter based on current edit mode
-                  .colorFilter(this.getCurrentFilter(index))
+                Stack() {
+                  // 图片阴影层
+                  Column()
+                    .width('100%')
+                    .height('100%')
+                    .backgroundColor('rgba(0, 0, 0, 0.1)')
+                    .blur(20)
+                    .offset({ y: 10 })
+                  
+                  // 主图片
+                  Image(imgSource)
+                    .width('100%')
+                    .height('100%')
+                    .objectFit(ImageFit.Contain)
+                    .borderRadius(20)
+                    // Apply filter based on current edit mode
+                    .colorFilter(this.getCurrentFilter(index))
+                }
                 // [End imageUsagePosition]
               }
               .justifyContent(FlexAlign.Center)
@@ -286,8 +334,8 @@ struct Index {
           .itemSpace(20)
           .indicator(
             Indicator.dot()
-              .selectedColor($r('sys.color.font_primary'))
-              .color($r('sys.color.font_secondary'))
+              .selectedColor('#667eea')
+              .color('rgba(102, 126, 234, 0.3)')
           )
           .loop(false)
           .effectMode(EdgeEffect.Spring)
@@ -297,43 +345,76 @@ struct Index {
         .justifyContent(FlexAlign.Center)
         .padding({ left: 16, right: 16, top: 8 })
         
-        // Image counter and add button
+        // Image counter and add button - 美化的按钮样式
         Row() {
-          Text(`图片 ${this.currentSwiperIndex + 1} / ${this.imageList.length}`)
-            .fontSize(14)
-            .fontColor($r('sys.color.font_secondary'))
+          // 图片计数器 - 添加背景卡片
+          Row() {
+            Text(`📸 图片 ${this.currentSwiperIndex + 1} / ${this.imageList.length}`)
+              .fontSize(14)
+              .fontColor('#667eea')
+              .fontWeight(FontWeight.Medium)
+          }
+          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+          .backgroundColor('#ffffff')
+          .borderRadius(20)
+          .shadow({
+            radius: 8,
+            color: 'rgba(0, 0, 0, 0.08)',
+            offsetX: 0,
+            offsetY: 2
+          })
           
           Blank()
           
+          // 添加图片按钮 - 渐变背景
           Button({ type: ButtonType.Normal }) {
             Row() {
               Text('+')
-                .fontSize(18)
-                .fontColor($r('sys.color.font_emphasize'))
+                .fontSize(20)
+                .fontColor('#ffffff')
+                .fontWeight(FontWeight.Bold)
               Text('添加图片')
                 .fontSize(14)
-                .fontColor($r('sys.color.font_emphasize'))
-                .margin({ left: 4 })
+                .fontColor('#ffffff')
+                .fontWeight(FontWeight.Medium)
+                .margin({ left: 6 })
             }
           }
-          .backgroundColor($r('sys.color.background_primary'))
-          .borderRadius(20)
-          .height(36)
-          .padding({ left: 16, right: 16 })
+          .linearGradient({
+            angle: 90,
+            colors: [
+              ['#667eea', 0.0],
+              ['#764ba2', 1.0]
+            ]
+          })
+          .borderRadius(24)
+          .height(40)
+          .padding({ left: 20, right: 20 })
+          .shadow({
+            radius: 12,
+            color: 'rgba(102, 126, 234, 0.4)',
+            offsetX: 0,
+            offsetY: 4
+          })
           .onClick(() => {
             this.pickImages();
           })
         }
         .width('100%')
         .padding({ left: 16, right: 16 })
-        .margin({ top: 8, bottom: 8 })
+        .margin({ top: 12, bottom: 12 })
       }
       .width('100%')
-      .backgroundColor($r('sys.color.background_secondary'))
+      .linearGradient({
+        angle: 180,
+        colors: [
+          ['rgba(255, 255, 255, 0.98)', 0.0],
+          ['rgba(255, 255, 255, 0.95)', 1.0]
+        ]
+      })
     }
     .height('100%')
     .width('100%')
-    .backgroundColor($r('sys.color.background_secondary'))
     .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
   }
 
@@ -341,39 +422,78 @@ struct Index {
   @Builder
   PresetFilterPanel() {
     Column() {
-      Text("Apply Filter")
-        .fontSize(18)
-        .fontWeight(FontWeight.Bold)
-        .width('100%')
-        .margin({ bottom: 16 })
-        .fontColor($r('sys.color.font_primary'))
+      // 标题栏
+      Row() {
+        Text('✨ 应用滤镜')
+          .fontSize(20)
+          .fontWeight(FontWeight.Bold)
+          .fontColor('#2d3748')
+        
+        Blank()
+        
+        // 当前滤镜指示
+        Text(this.getCurrentFilterName())
+          .fontSize(12)
+          .fontColor('#667eea')
+          .fontWeight(FontWeight.Medium)
+          .padding({ left: 12, right: 12, top: 6, bottom: 6 })
+          .backgroundColor('rgba(102, 126, 234, 0.1)')
+          .borderRadius(12)
+      }
+      .width('100%')
+      .margin({ bottom: 20 })
+      
       // [Start radioUsagePosition]
       Grid() {
-        ForEach(FILTER_OPTIONS, (item: FilterOption) => {
+        ForEach(FILTER_OPTIONS, (item: FilterOption, index: number) => {
           GridItem() {
-            Row() {
-              Radio({ value: item.value, group: 'filterGroup' })
-                .checked(this.imageFilterTags[this.currentSwiperIndex] === item.value)
-                .onChange((isChecked: boolean) => {
-                  if (isChecked) {
-                    this.imageFilterTags[this.currentSwiperIndex] = item.value;
-                  }
-                })
+            // 滤镜选项卡片
+            Column() {
+              // 图标或装饰
+              Text(this.getFilterIcon(item.value))
+                .fontSize(24)
+                .margin({ bottom: 8 })
+              
+              // 滤镜名称
               Text(item.label)
-                .fontSize(14)
-                .fontColor($r('sys.color.font_primary'))
-                .margin({ left: 4 })
-                .onClick(() => {
-                  this.imageFilterTags[this.currentSwiperIndex] = item.value;
-                })
+                .fontSize(13)
+                .fontColor(this.imageFilterTags[this.currentSwiperIndex] === item.value ? '#667eea' : '#4a5568')
+                .fontWeight(this.imageFilterTags[this.currentSwiperIndex] === item.value ? FontWeight.Bold : FontWeight.Medium)
             }
             .width('100%')
+            .height(80)
+            .justifyContent(FlexAlign.Center)
+            .alignItems(HorizontalAlign.Center)
+            .backgroundColor(this.imageFilterTags[this.currentSwiperIndex] === item.value ? '#ffffff' : 'rgba(255, 255, 255, 0.6)')
+            .borderRadius(16)
+            .border({
+              width: this.imageFilterTags[this.currentSwiperIndex] === item.value ? 2 : 1,
+              color: this.imageFilterTags[this.currentSwiperIndex] === item.value ? '#667eea' : 'rgba(102, 126, 234, 0.2)'
+            })
+            .shadow(this.imageFilterTags[this.currentSwiperIndex] === item.value ? {
+              radius: 16,
+              color: 'rgba(102, 126, 234, 0.25)',
+              offsetX: 0,
+              offsetY: 6
+            } : {
+              radius: 4,
+              color: 'rgba(0, 0, 0, 0.05)',
+              offsetX: 0,
+              offsetY: 2
+            })
+            .onClick(() => {
+              this.imageFilterTags[this.currentSwiperIndex] = item.value;
+            })
+            .animation({
+              duration: 250,
+              curve: Curve.FastOutSlowIn
+            })
           }
         }, (item: FilterOption, index: number) => index + '_' + JSON.stringify(item))
       }
       .columnsTemplate('1fr 1fr 1fr')
       .rowsGap(16)
-      .columnsGap(10)
+      .columnsGap(12)
       .width('100%')
       .layoutWeight(1)
       .scrollBar(BarState.Off)
@@ -383,8 +503,41 @@ struct Index {
     .width('100%')
     .height('100%')
     .padding(24)
-    .backgroundColor($r('sys.color.background_primary'))
-    .borderRadius(16)
+    .backgroundColor('#ffffff')
+    .borderRadius(24)
+    .shadow({
+      radius: 20,
+      color: 'rgba(0, 0, 0, 0.08)',
+      offsetX: 0,
+      offsetY: 8
+    })
+  }
+  
+  // 获取当前滤镜名称
+  private getCurrentFilterName(): string {
+    const currentTag = this.imageFilterTags[this.currentSwiperIndex];
+    const option = FILTER_OPTIONS.find(opt => opt.value === currentTag);
+    return option ? option.label : 'Original';
+  }
+  
+  // 获取滤镜图标
+  private getFilterIcon(value: string): string {
+    const iconMap: Record<string, string> = {
+      'original': '📷',
+      'retro': '🎞️',
+      'invert': '🔄',
+      'enhance': '✨',
+      'whitening': '💫',
+      'sepia': '🎨',
+      'cool': '❄️',
+      'warm': '☀️',
+      'contrast': '⚡',
+      'swap': '🌈',
+      'posterize': '🎭',
+      'nightvision': '🌙',
+      'vintage': '📜'
+    };
+    return iconMap[value] || '🎨';
   }
 
   // Pick images from gallery

@@ -332,26 +332,44 @@ class Index extends ViewPU {
             Stack.create({ alignContent: Alignment.Top });
             Stack.height('100%');
             Stack.width('100%');
-            Stack.backgroundColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
             Stack.expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM]);
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // 底层：滚动内容区域（参数调整区域）
+            // 底层：渐变背景
+            Column.create();
+            // 底层：渐变背景
+            Column.width('100%');
+            // 底层：渐变背景
+            Column.height('100%');
+            // 底层：渐变背景
+            Column.linearGradient({
+                angle: 180,
+                colors: [
+                    ['#f8f9fa', 0.0],
+                    ['#e9ecef', 0.5],
+                    ['#dee2e6', 1.0]
+                ]
+            });
+        }, Column);
+        // 底层：渐变背景
+        Column.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 中层：滚动内容区域（参数调整区域）
             Scroll.create(this.scroller);
-            // 底层：滚动内容区域（参数调整区域）
+            // 中层：滚动内容区域（参数调整区域）
             Scroll.width('100%');
-            // 底层：滚动内容区域（参数调整区域）
+            // 中层：滚动内容区域（参数调整区域）
             Scroll.height('100%');
-            // 底层：滚动内容区域（参数调整区域）
+            // 中层：滚动内容区域（参数调整区域）
             Scroll.scrollBar(BarState.Off);
-            // 底层：滚动内容区域（参数调整区域）
+            // 中层：滚动内容区域（参数调整区域）
             Scroll.edgeEffect(EdgeEffect.Spring);
-            // 底层：滚动内容区域（参数调整区域）
+            // 中层：滚动内容区域（参数调整区域）
             Scroll.onScroll(() => {
                 // Update scroll offset
                 this.scrollOffset = this.scroller.currentOffset().yOffset;
             });
-            // 底层：滚动内容区域（参数调整区域）
+            // 中层：滚动内容区域（参数调整区域）
             Scroll.onScrollEdge((side: Edge) => {
                 // Reset scroll offset when reaching top edge
                 if (side === Edge.Top) {
@@ -374,46 +392,86 @@ class Index extends ViewPU {
         // 占位区域，为顶部的图片区域留出空间
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Mode Switch Tabs
+            // Mode Switch Tabs - 美化的标签切换
             Row.create();
-            // Mode Switch Tabs
+            // Mode Switch Tabs - 美化的标签切换
             Row.width('100%');
-            // Mode Switch Tabs
+            // Mode Switch Tabs - 美化的标签切换
             Row.justifyContent(FlexAlign.Center);
-            // Mode Switch Tabs
-            Row.margin({ bottom: 8 });
+            // Mode Switch Tabs - 美化的标签切换
+            Row.margin({ bottom: 16 });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('预设滤镜');
-            Text.fontSize(16);
-            Text.fontWeight(this.editMode === 'preset' ? FontWeight.Bold : FontWeight.Normal);
-            Text.fontColor(this.editMode === 'preset'
-                ? { "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" } : { "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.padding({ left: 20, right: 20, top: 8, bottom: 8 });
-            Text.borderRadius(20);
-            Text.backgroundColor(this.editMode === 'preset'
-                ? { "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" } : 'transparent');
-            Text.onClick(() => {
+            // 预设滤镜标签
+            Column.create();
+            Context.animation({
+                duration: 300,
+                curve: Curve.FastOutSlowIn
+            });
+            // 预设滤镜标签
+            Column.padding({ left: 24, right: 24, top: 12, bottom: 12 });
+            // 预设滤镜标签
+            Column.borderRadius(24);
+            // 预设滤镜标签
+            Column.backgroundColor(this.editMode === 'preset' ? '#ffffff' : 'transparent');
+            // 预设滤镜标签
+            Column.shadow(this.editMode === 'preset' ? {
+                radius: 12,
+                color: 'rgba(102, 126, 234, 0.2)',
+                offsetX: 0,
+                offsetY: 4
+            } : { radius: 0, color: 'transparent', offsetX: 0, offsetY: 0 });
+            // 预设滤镜标签
+            Column.onClick(() => {
                 this.editMode = 'preset';
             });
+            Context.animation(null);
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('🎨 预设滤镜');
+            Text.fontSize(15);
+            Text.fontWeight(this.editMode === 'preset' ? FontWeight.Bold : FontWeight.Medium);
+            Text.fontColor(this.editMode === 'preset' ? '#667eea' : '#8e9aaf');
         }, Text);
         Text.pop();
+        // 预设滤镜标签
+        Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('参数调整');
-            Text.fontSize(16);
-            Text.fontWeight(this.editMode === 'adjust' ? FontWeight.Bold : FontWeight.Normal);
-            Text.fontColor(this.editMode === 'adjust'
-                ? { "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" } : { "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.padding({ left: 20, right: 20, top: 8, bottom: 8 });
-            Text.borderRadius(20);
-            Text.backgroundColor(this.editMode === 'adjust'
-                ? { "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" } : 'transparent');
-            Text.onClick(() => {
+            // 参数调整标签
+            Column.create();
+            Context.animation({
+                duration: 300,
+                curve: Curve.FastOutSlowIn
+            });
+            // 参数调整标签
+            Column.padding({ left: 24, right: 24, top: 12, bottom: 12 });
+            // 参数调整标签
+            Column.borderRadius(24);
+            // 参数调整标签
+            Column.backgroundColor(this.editMode === 'adjust' ? '#ffffff' : 'transparent');
+            // 参数调整标签
+            Column.shadow(this.editMode === 'adjust' ? {
+                radius: 12,
+                color: 'rgba(102, 126, 234, 0.2)',
+                offsetX: 0,
+                offsetY: 4
+            } : { radius: 0, color: 'transparent', offsetX: 0, offsetY: 0 });
+            // 参数调整标签
+            Column.onClick(() => {
                 this.editMode = 'adjust';
             });
+            Context.animation(null);
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('⚙️ 参数调整');
+            Text.fontSize(15);
+            Text.fontWeight(this.editMode === 'adjust' ? FontWeight.Bold : FontWeight.Medium);
+            Text.fontColor(this.editMode === 'adjust' ? '#667eea' : '#8e9aaf');
         }, Text);
         Text.pop();
-        // Mode Switch Tabs
+        // 参数调整标签
+        Column.pop();
+        // Mode Switch Tabs - 美化的标签切换
         Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // Bottom Section: Control Panel
@@ -449,7 +507,7 @@ class Index extends ViewPU {
                                     onReset: () => {
                                         this.resetCurrentParams();
                                     }
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 204, col: 15 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 235, col: 15 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -479,7 +537,7 @@ class Index extends ViewPU {
         // Bottom Section: Control Panel
         Column.pop();
         Column.pop();
-        // 底层：滚动内容区域（参数调整区域）
+        // 中层：滚动内容区域（参数调整区域）
         Scroll.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 顶层：固定的图片区域（吸顶效果）
@@ -487,19 +545,31 @@ class Index extends ViewPU {
             // 顶层：固定的图片区域（吸顶效果）
             Column.width('100%');
             // 顶层：固定的图片区域（吸顶效果）
-            Column.backgroundColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Column.linearGradient({
+                angle: 180,
+                colors: [
+                    ['rgba(255, 255, 255, 0.98)', 0.0],
+                    ['rgba(255, 255, 255, 0.95)', 1.0]
+                ]
+            });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Top status bar area
+            // Top status bar area - 渐变背景
             Row.create();
-            // Top status bar area
+            // Top status bar area - 渐变背景
             Row.width('100%');
-            // Top status bar area
+            // Top status bar area - 渐变背景
             Row.height(45);
-            // Top status bar area
-            Row.backgroundColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            // Top status bar area - 渐变背景
+            Row.linearGradient({
+                angle: 90,
+                colors: [
+                    ['rgba(102, 126, 234, 0.95)', 0.0],
+                    ['rgba(118, 75, 162, 0.95)', 1.0]
+                ]
+            });
         }, Row);
-        // Top status bar area
+        // Top status bar area - 渐变背景
         Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // Image Carousel Section
@@ -533,8 +603,8 @@ class Index extends ViewPU {
             Swiper.itemSpace(20);
             // [Start swiperUsagePosition]
             Swiper.indicator(Indicator.dot()
-                .selectedColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" })
-                .color({ "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" }));
+                .selectedColor('#667eea')
+                .color('rgba(102, 126, 234, 0.3)'));
             // [Start swiperUsagePosition]
             Swiper.loop(false);
             // [Start swiperUsagePosition]
@@ -562,18 +632,40 @@ class Index extends ViewPU {
                 }, Column);
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                     // [Start imageUsagePosition]
+                    Stack.create();
+                }, Stack);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    // 图片阴影层
+                    Column.create();
+                    // 图片阴影层
+                    Column.width('100%');
+                    // 图片阴影层
+                    Column.height('100%');
+                    // 图片阴影层
+                    Column.backgroundColor('rgba(0, 0, 0, 0.1)');
+                    // 图片阴影层
+                    Column.blur(20);
+                    // 图片阴影层
+                    Column.offset({ y: 10 });
+                }, Column);
+                // 图片阴影层
+                Column.pop();
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    // 主图片
                     Image.create(imgSource);
-                    // [Start imageUsagePosition]
+                    // 主图片
                     Image.width('100%');
-                    // [Start imageUsagePosition]
+                    // 主图片
                     Image.height('100%');
-                    // [Start imageUsagePosition]
+                    // 主图片
                     Image.objectFit(ImageFit.Contain);
-                    // [Start imageUsagePosition]
-                    Image.borderRadius(16);
-                    // [Start imageUsagePosition]
+                    // 主图片
+                    Image.borderRadius(20);
+                    // 主图片
                     Image.colorFilter(this.getCurrentFilter(index));
                 }, Image);
+                // [Start imageUsagePosition]
+                Stack.pop();
                 // Container needed for individual scale animation
                 Column.pop();
             };
@@ -585,31 +677,70 @@ class Index extends ViewPU {
         // Image Carousel Section
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Image counter and add button
+            // Image counter and add button - 美化的按钮样式
             Row.create();
-            // Image counter and add button
+            // Image counter and add button - 美化的按钮样式
             Row.width('100%');
-            // Image counter and add button
+            // Image counter and add button - 美化的按钮样式
             Row.padding({ left: 16, right: 16 });
-            // Image counter and add button
-            Row.margin({ top: 8, bottom: 8 });
+            // Image counter and add button - 美化的按钮样式
+            Row.margin({ top: 12, bottom: 12 });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(`图片 ${this.currentSwiperIndex + 1} / ${this.imageList.length}`);
+            // 图片计数器 - 添加背景卡片
+            Row.create();
+            // 图片计数器 - 添加背景卡片
+            Row.padding({ left: 16, right: 16, top: 8, bottom: 8 });
+            // 图片计数器 - 添加背景卡片
+            Row.backgroundColor('#ffffff');
+            // 图片计数器 - 添加背景卡片
+            Row.borderRadius(20);
+            // 图片计数器 - 添加背景卡片
+            Row.shadow({
+                radius: 8,
+                color: 'rgba(0, 0, 0, 0.08)',
+                offsetX: 0,
+                offsetY: 2
+            });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(`📸 图片 ${this.currentSwiperIndex + 1} / ${this.imageList.length}`);
             Text.fontSize(14);
-            Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Text.fontColor('#667eea');
+            Text.fontWeight(FontWeight.Medium);
         }, Text);
         Text.pop();
+        // 图片计数器 - 添加背景卡片
+        Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Blank.create();
         }, Blank);
         Blank.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 添加图片按钮 - 渐变背景
             Button.createWithChild({ type: ButtonType.Normal });
-            Button.backgroundColor({ "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Button.borderRadius(20);
-            Button.height(36);
-            Button.padding({ left: 16, right: 16 });
+            // 添加图片按钮 - 渐变背景
+            Button.linearGradient({
+                angle: 90,
+                colors: [
+                    ['#667eea', 0.0],
+                    ['#764ba2', 1.0]
+                ]
+            });
+            // 添加图片按钮 - 渐变背景
+            Button.borderRadius(24);
+            // 添加图片按钮 - 渐变背景
+            Button.height(40);
+            // 添加图片按钮 - 渐变背景
+            Button.padding({ left: 20, right: 20 });
+            // 添加图片按钮 - 渐变背景
+            Button.shadow({
+                radius: 12,
+                color: 'rgba(102, 126, 234, 0.4)',
+                offsetX: 0,
+                offsetY: 4
+            });
+            // 添加图片按钮 - 渐变背景
             Button.onClick(() => {
                 this.pickImages();
             });
@@ -619,20 +750,23 @@ class Index extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('+');
-            Text.fontSize(18);
-            Text.fontColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Text.fontSize(20);
+            Text.fontColor('#ffffff');
+            Text.fontWeight(FontWeight.Bold);
         }, Text);
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('添加图片');
             Text.fontSize(14);
-            Text.fontColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.margin({ left: 4 });
+            Text.fontColor('#ffffff');
+            Text.fontWeight(FontWeight.Medium);
+            Text.margin({ left: 6 });
         }, Text);
         Text.pop();
         Row.pop();
+        // 添加图片按钮 - 渐变背景
         Button.pop();
-        // Image counter and add button
+        // Image counter and add button - 美化的按钮样式
         Row.pop();
         // 顶层：固定的图片区域（吸顶效果）
         Column.pop();
@@ -645,18 +779,54 @@ class Index extends ViewPU {
             Column.width('100%');
             Column.height('100%');
             Column.padding(24);
-            Column.backgroundColor({ "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Column.borderRadius(16);
+            Column.backgroundColor('#ffffff');
+            Column.borderRadius(24);
+            Column.shadow({
+                radius: 20,
+                color: 'rgba(0, 0, 0, 0.08)',
+                offsetX: 0,
+                offsetY: 8
+            });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create("Apply Filter");
-            Text.fontSize(18);
+            // 标题栏
+            Row.create();
+            // 标题栏
+            Row.width('100%');
+            // 标题栏
+            Row.margin({ bottom: 20 });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('✨ 应用滤镜');
+            Text.fontSize(20);
             Text.fontWeight(FontWeight.Bold);
-            Text.width('100%');
-            Text.margin({ bottom: 16 });
-            Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Text.fontColor('#2d3748');
         }, Text);
         Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Blank.create();
+        }, Blank);
+        Blank.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 当前滤镜指示
+            Text.create(this.getCurrentFilterName());
+            // 当前滤镜指示
+            Text.fontSize(12);
+            // 当前滤镜指示
+            Text.fontColor('#667eea');
+            // 当前滤镜指示
+            Text.fontWeight(FontWeight.Medium);
+            // 当前滤镜指示
+            Text.padding({ left: 12, right: 12, top: 6, bottom: 6 });
+            // 当前滤镜指示
+            Text.backgroundColor('rgba(102, 126, 234, 0.1)');
+            // 当前滤镜指示
+            Text.borderRadius(12);
+        }, Text);
+        // 当前滤镜指示
+        Text.pop();
+        // 标题栏
+        Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // [Start radioUsagePosition]
             Grid.create();
@@ -665,7 +835,7 @@ class Index extends ViewPU {
             // [Start radioUsagePosition]
             Grid.rowsGap(16);
             // [Start radioUsagePosition]
-            Grid.columnsGap(10);
+            Grid.columnsGap(12);
             // [Start radioUsagePosition]
             Grid.width('100%');
             // [Start radioUsagePosition]
@@ -677,7 +847,7 @@ class Index extends ViewPU {
         }, Grid);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
-            const forEachItemGenFunction = _item => {
+            const forEachItemGenFunction = (_item, index: number) => {
                 const item = _item;
                 {
                     const itemCreation2 = (elmtId, isInitialRender) => {
@@ -686,40 +856,107 @@ class Index extends ViewPU {
                     const observedDeepRender = () => {
                         this.observeComponentCreation2(itemCreation2, GridItem);
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            Row.create();
-                            Row.width('100%');
-                        }, Row);
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            Radio.create({ value: item.value, group: 'filterGroup' });
-                            Radio.checked(this.imageFilterTags[this.currentSwiperIndex] === item.value);
-                            Radio.onChange((isChecked: boolean) => {
-                                if (isChecked) {
-                                    this.imageFilterTags[this.currentSwiperIndex] = item.value;
-                                }
+                            // 滤镜选项卡片
+                            Column.create();
+                            Context.animation({
+                                duration: 250,
+                                curve: Curve.FastOutSlowIn
                             });
-                        }, Radio);
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            Text.create(item.label);
-                            Text.fontSize(14);
-                            Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-                            Text.margin({ left: 4 });
-                            Text.onClick(() => {
+                            // 滤镜选项卡片
+                            Column.width('100%');
+                            // 滤镜选项卡片
+                            Column.height(80);
+                            // 滤镜选项卡片
+                            Column.justifyContent(FlexAlign.Center);
+                            // 滤镜选项卡片
+                            Column.alignItems(HorizontalAlign.Center);
+                            // 滤镜选项卡片
+                            Column.backgroundColor(this.imageFilterTags[this.currentSwiperIndex] === item.value ? '#ffffff' : 'rgba(255, 255, 255, 0.6)');
+                            // 滤镜选项卡片
+                            Column.borderRadius(16);
+                            // 滤镜选项卡片
+                            Column.border({
+                                width: this.imageFilterTags[this.currentSwiperIndex] === item.value ? 2 : 1,
+                                color: this.imageFilterTags[this.currentSwiperIndex] === item.value ? '#667eea' : 'rgba(102, 126, 234, 0.2)'
+                            });
+                            // 滤镜选项卡片
+                            Column.shadow(this.imageFilterTags[this.currentSwiperIndex] === item.value ? {
+                                radius: 16,
+                                color: 'rgba(102, 126, 234, 0.25)',
+                                offsetX: 0,
+                                offsetY: 6
+                            } : {
+                                radius: 4,
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                offsetX: 0,
+                                offsetY: 2
+                            });
+                            // 滤镜选项卡片
+                            Column.onClick(() => {
                                 this.imageFilterTags[this.currentSwiperIndex] = item.value;
                             });
+                            Context.animation(null);
+                        }, Column);
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            // 图标或装饰
+                            Text.create(this.getFilterIcon(item.value));
+                            // 图标或装饰
+                            Text.fontSize(24);
+                            // 图标或装饰
+                            Text.margin({ bottom: 8 });
                         }, Text);
+                        // 图标或装饰
                         Text.pop();
-                        Row.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            // 滤镜名称
+                            Text.create(item.label);
+                            // 滤镜名称
+                            Text.fontSize(13);
+                            // 滤镜名称
+                            Text.fontColor(this.imageFilterTags[this.currentSwiperIndex] === item.value ? '#667eea' : '#4a5568');
+                            // 滤镜名称
+                            Text.fontWeight(this.imageFilterTags[this.currentSwiperIndex] === item.value ? FontWeight.Bold : FontWeight.Medium);
+                        }, Text);
+                        // 滤镜名称
+                        Text.pop();
+                        // 滤镜选项卡片
+                        Column.pop();
                         GridItem.pop();
                     };
                     observedDeepRender();
                 }
             };
-            this.forEachUpdateFunction(elmtId, FILTER_OPTIONS, forEachItemGenFunction, (item: FilterOption, index: number) => index + '_' + JSON.stringify(item), false, true);
+            this.forEachUpdateFunction(elmtId, FILTER_OPTIONS, forEachItemGenFunction, (item: FilterOption, index: number) => index + '_' + JSON.stringify(item), true, true);
         }, ForEach);
         ForEach.pop();
         // [Start radioUsagePosition]
         Grid.pop();
         Column.pop();
+    }
+    // 获取当前滤镜名称
+    private getCurrentFilterName(): string {
+        const currentTag = this.imageFilterTags[this.currentSwiperIndex];
+        const option = FILTER_OPTIONS.find(opt => opt.value === currentTag);
+        return option ? option.label : 'Original';
+    }
+    // 获取滤镜图标
+    private getFilterIcon(value: string): string {
+        const iconMap: Record<string, string> = {
+            'original': '📷',
+            'retro': '🎞️',
+            'invert': '🔄',
+            'enhance': '✨',
+            'whitening': '💫',
+            'sepia': '🎨',
+            'cool': '❄️',
+            'warm': '☀️',
+            'contrast': '⚡',
+            'swap': '🌈',
+            'posterize': '🎭',
+            'nightvision': '🌙',
+            'vintage': '📜'
+        };
+        return iconMap[value] || '🎨';
     }
     // Pick images from gallery
     private async pickImages(): Promise<void> {

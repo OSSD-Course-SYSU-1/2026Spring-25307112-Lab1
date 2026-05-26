@@ -35,306 +35,144 @@ export struct AdjustPanel {
   
   build() {
     Column() {
-      // Header with title and reset button
+      // Header with title and reset button - 美化的标题栏
       Row() {
-        Text("参数调整")
-          .fontSize(18)
-          .fontWeight(FontWeight.Bold)
-          .fontColor($r('sys.color.font_primary'))
+        Row() {
+          Text('⚙️ ')
+            .fontSize(20)
+          Text("参数调整")
+            .fontSize(20)
+            .fontWeight(FontWeight.Bold)
+            .fontColor('#2d3748')
+        }
         
         Blank()
         
-        Button("重置")
-          .fontSize(14)
-          .fontColor($r('sys.color.font_emphasize'))
-          .backgroundColor($r('sys.color.background_primary'))
-          .borderRadius(8)
-          .height(32)
-          .padding({ left: 12, right: 12 })
-          .onClick(() => {
-            if (this.onReset) {
-              this.onReset();
-            }
-          })
+        // 重置按钮 - 渐变背景
+        Button() {
+          Row() {
+            Text('↺')
+              .fontSize(16)
+              .fontColor('#ffffff')
+            Text('重置')
+              .fontSize(13)
+              .fontColor('#ffffff')
+              .fontWeight(FontWeight.Medium)
+              .margin({ left: 4 })
+          }
+        }
+        .linearGradient({
+          angle: 90,
+          colors: [
+            ['#667eea', 0.0],
+            ['#764ba2', 1.0]
+          ]
+        })
+        .borderRadius(18)
+        .height(36)
+        .padding({ left: 16, right: 16 })
+        .shadow({
+          radius: 8,
+          color: 'rgba(102, 126, 234, 0.3)',
+          offsetX: 0,
+          offsetY: 3
+        })
+        .onClick(() => {
+          if (this.onReset) {
+            this.onReset();
+          }
+        })
       }
       .width('100%')
-      .margin({ bottom: 16 })
+      .margin({ bottom: 20 })
       
       // Scrollable slider list
       Scroll() {
         Column() {
-          // Brightness
-          Column() {
-            Row() {
-              Text('亮度')
-                .fontSize(14)
-                .fontColor($r('sys.color.font_primary'))
-                .width(60)
-              Blank()
-              Text(`${Math.round(this.brightnessValue)}`)
-                .fontSize(14)
-                .fontColor($r('sys.color.font_secondary'))
-                .width(60)
-                .textAlign(TextAlign.End)
+          // Brightness - 亮度
+          this.SliderItem(
+            '💡',
+            '亮度',
+            this.brightnessValue,
+            0,
+            200,
+            (newValue: number) => {
+              this.brightnessValue = Math.round(newValue);
             }
-            .width('100%')
-            .margin({ bottom: 8 })
-            Row() {
-              Slider({
-                value: this.brightnessValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-              })
-                .blockColor($r('sys.color.font_emphasize'))
-                .trackColor($r('sys.color.background_secondary'))
-                .selectedColor($r('sys.color.font_emphasize'))
-                .showSteps(false)
-                .showTips(true)
-                .width('100%')
-                .onChange((newValue: number) => {
-                  this.brightnessValue = Math.round(newValue);
-                })
-            }
-            .width('100%')
-          }
-          .width('100%')
-          .padding({ top: 8, bottom: 8 })
+          )
           
-          // Contrast
-          Column() {
-            Row() {
-              Text('对比度')
-                .fontSize(14)
-                .fontColor($r('sys.color.font_primary'))
-                .width(60)
-              Blank()
-              Text(`${Math.round(this.contrastValue)}`)
-                .fontSize(14)
-                .fontColor($r('sys.color.font_secondary'))
-                .width(60)
-                .textAlign(TextAlign.End)
+          // Contrast - 对比度
+          this.SliderItem(
+            '🔲',
+            '对比度',
+            this.contrastValue,
+            0,
+            200,
+            (newValue: number) => {
+              this.contrastValue = Math.round(newValue);
             }
-            .width('100%')
-            .margin({ bottom: 8 })
-            Row() {
-              Slider({
-                value: this.contrastValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-              })
-                .blockColor($r('sys.color.font_emphasize'))
-                .trackColor($r('sys.color.background_secondary'))
-                .selectedColor($r('sys.color.font_emphasize'))
-                .showSteps(false)
-                .showTips(true)
-                .width('100%')
-                .onChange((newValue: number) => {
-                  this.contrastValue = Math.round(newValue);
-                })
-            }
-            .width('100%')
-          }
-          .width('100%')
-          .padding({ top: 8, bottom: 8 })
+          )
           
-          // Saturation
-          Column() {
-            Row() {
-              Text('饱和度')
-                .fontSize(14)
-                .fontColor($r('sys.color.font_primary'))
-                .width(60)
-              Blank()
-              Text(`${Math.round(this.saturationValue)}`)
-                .fontSize(14)
-                .fontColor($r('sys.color.font_secondary'))
-                .width(60)
-                .textAlign(TextAlign.End)
+          // Saturation - 饱和度
+          this.SliderItem(
+            '🎨',
+            '饱和度',
+            this.saturationValue,
+            0,
+            200,
+            (newValue: number) => {
+              this.saturationValue = Math.round(newValue);
             }
-            .width('100%')
-            .margin({ bottom: 8 })
-            Row() {
-              Slider({
-                value: this.saturationValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-              })
-                .blockColor($r('sys.color.font_emphasize'))
-                .trackColor($r('sys.color.background_secondary'))
-                .selectedColor($r('sys.color.font_emphasize'))
-                .showSteps(false)
-                .showTips(true)
-                .width('100%')
-                .onChange((newValue: number) => {
-                  this.saturationValue = Math.round(newValue);
-                })
-            }
-            .width('100%')
-          }
-          .width('100%')
-          .padding({ top: 8, bottom: 8 })
+          )
           
-          // Hue
-          Column() {
-            Row() {
-              Text('色相')
-                .fontSize(14)
-                .fontColor($r('sys.color.font_primary'))
-                .width(60)
-              Blank()
-              Text(`${Math.round(this.hueValue)}°`)
-                .fontSize(14)
-                .fontColor($r('sys.color.font_secondary'))
-                .width(60)
-                .textAlign(TextAlign.End)
-            }
-            .width('100%')
-            .margin({ bottom: 8 })
-            Row() {
-              Slider({
-                value: this.hueValue,
-                min: 0,
-                max: 360,
-                step: 1,
-                style: SliderStyle.OutSet
-              })
-                .blockColor($r('sys.color.font_emphasize'))
-                .trackColor($r('sys.color.background_secondary'))
-                .selectedColor($r('sys.color.font_emphasize'))
-                .showSteps(false)
-                .showTips(true)
-                .width('100%')
-                .onChange((newValue: number) => {
-                  this.hueValue = Math.round(newValue);
-                })
-            }
-            .width('100%')
-          }
-          .width('100%')
-          .padding({ top: 8, bottom: 8 })
+          // Hue - 色相
+          this.SliderItem(
+            '🌈',
+            '色相',
+            this.hueValue,
+            0,
+            360,
+            (newValue: number) => {
+              this.hueValue = Math.round(newValue);
+            },
+            '°'
+          )
           
-          // Warmth
-          Column() {
-            Row() {
-              Text('色温')
-                .fontSize(14)
-                .fontColor($r('sys.color.font_primary'))
-                .width(60)
-              Blank()
-              Text(`${Math.round(this.warmthValue)}`)
-                .fontSize(14)
-                .fontColor($r('sys.color.font_secondary'))
-                .width(60)
-                .textAlign(TextAlign.End)
+          // Warmth - 色温
+          this.SliderItem(
+            '🌡️',
+            '色温',
+            this.warmthValue,
+            0,
+            200,
+            (newValue: number) => {
+              this.warmthValue = Math.round(newValue);
             }
-            .width('100%')
-            .margin({ bottom: 8 })
-            Row() {
-              Slider({
-                value: this.warmthValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-              })
-                .blockColor($r('sys.color.font_emphasize'))
-                .trackColor($r('sys.color.background_secondary'))
-                .selectedColor($r('sys.color.font_emphasize'))
-                .showSteps(false)
-                .showTips(true)
-                .width('100%')
-                .onChange((newValue: number) => {
-                  this.warmthValue = Math.round(newValue);
-                })
-            }
-            .width('100%')
-          }
-          .width('100%')
-          .padding({ top: 8, bottom: 8 })
+          )
           
-          // Exposure
-          Column() {
-            Row() {
-              Text('曝光')
-                .fontSize(14)
-                .fontColor($r('sys.color.font_primary'))
-                .width(60)
-              Blank()
-              Text(`${Math.round(this.exposureValue)}`)
-                .fontSize(14)
-                .fontColor($r('sys.color.font_secondary'))
-                .width(60)
-                .textAlign(TextAlign.End)
+          // Exposure - 曝光
+          this.SliderItem(
+            '☀️',
+            '曝光',
+            this.exposureValue,
+            0,
+            200,
+            (newValue: number) => {
+              this.exposureValue = Math.round(newValue);
             }
-            .width('100%')
-            .margin({ bottom: 8 })
-            Row() {
-              Slider({
-                value: this.exposureValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-              })
-                .blockColor($r('sys.color.font_emphasize'))
-                .trackColor($r('sys.color.background_secondary'))
-                .selectedColor($r('sys.color.font_emphasize'))
-                .showSteps(false)
-                .showTips(true)
-                .width('100%')
-                .onChange((newValue: number) => {
-                  this.exposureValue = Math.round(newValue);
-                })
-            }
-            .width('100%')
-          }
-          .width('100%')
-          .padding({ top: 8, bottom: 8 })
+          )
           
-          // Gamma
-          Column() {
-            Row() {
-              Text('伽马')
-                .fontSize(14)
-                .fontColor($r('sys.color.font_primary'))
-                .width(60)
-              Blank()
-              Text(`${Math.round(this.gammaValue)}`)
-                .fontSize(14)
-                .fontColor($r('sys.color.font_secondary'))
-                .width(60)
-                .textAlign(TextAlign.End)
+          // Gamma - 伽马
+          this.SliderItem(
+            '📊',
+            '伽马',
+            this.gammaValue,
+            0,
+            200,
+            (newValue: number) => {
+              this.gammaValue = Math.round(newValue);
             }
-            .width('100%')
-            .margin({ bottom: 8 })
-            Row() {
-              Slider({
-                value: this.gammaValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-              })
-                .blockColor($r('sys.color.font_emphasize'))
-                .trackColor($r('sys.color.background_secondary'))
-                .selectedColor($r('sys.color.font_emphasize'))
-                .showSteps(false)
-                .showTips(true)
-                .width('100%')
-                .onChange((newValue: number) => {
-                  this.gammaValue = Math.round(newValue);
-                })
-            }
-            .width('100%')
-          }
-          .width('100%')
-          .padding({ top: 8, bottom: 8 })
+          )
         }
         .width('100%')
       }
@@ -345,8 +183,101 @@ export struct AdjustPanel {
     }
     .width('100%')
     .height('100%')
-    .padding(20)
-    .backgroundColor($r('sys.color.background_primary'))
-    .borderRadius(16)
+    .padding(24)
+    .backgroundColor('#ffffff')
+    .borderRadius(24)
+    .shadow({
+      radius: 20,
+      color: 'rgba(0, 0, 0, 0.08)',
+      offsetX: 0,
+      offsetY: 8
+    })
+  }
+  
+  // 美化的滑块项组件
+  @Builder
+  SliderItem(
+    icon: string,
+    label: string,
+    value: number,
+    min: number,
+    max: number,
+    onChange: (value: number) => void,
+    unit: string = ''
+  ) {
+    Column() {
+      // 标签和数值显示
+      Row() {
+        // 图标和标签
+        Row() {
+          Text(icon)
+            .fontSize(18)
+          Text(label)
+            .fontSize(14)
+            .fontColor('#4a5568')
+            .fontWeight(FontWeight.Medium)
+            .margin({ left: 6 })
+        }
+        
+        Blank()
+        
+        // 数值显示 - 带背景卡片
+        Row() {
+          Text(`${Math.round(value)}${unit}`)
+            .fontSize(14)
+            .fontColor('#667eea')
+            .fontWeight(FontWeight.Bold)
+        }
+        .padding({ left: 12, right: 12, top: 4, bottom: 4 })
+        .backgroundColor('rgba(102, 126, 234, 0.1)')
+        .borderRadius(10)
+      }
+      .width('100%')
+      .margin({ bottom: 10 })
+      
+      // 滑块轨道 - 自定义样式
+      Stack() {
+        // 背景轨道
+        Row()
+          .width('100%')
+          .height(6)
+          .backgroundColor('rgba(102, 126, 234, 0.15)')
+          .borderRadius(3)
+        
+        // 进度填充
+        Row()
+          .width(`${((value - min) / (max - min)) * 100}%`)
+          .height(6)
+          .linearGradient({
+            angle: 90,
+            colors: [
+              ['#667eea', 0.0],
+              ['#764ba2', 1.0]
+            ]
+          })
+          .borderRadius(3)
+      }
+      .width('100%')
+      .height(6)
+      
+      // 实际滑块（透明，用于交互）
+      Slider({
+        value: value,
+        min: min,
+        max: max,
+        step: 1,
+        style: SliderStyle.OutSet
+      })
+        .blockColor('transparent')
+        .trackColor('transparent')
+        .selectedColor('transparent')
+        .showSteps(false)
+        .showTips(false)
+        .width('100%')
+        .height(20)
+        .onChange(onChange)
+    }
+    .width('100%')
+    .padding({ top: 12, bottom: 12 })
   }
 }

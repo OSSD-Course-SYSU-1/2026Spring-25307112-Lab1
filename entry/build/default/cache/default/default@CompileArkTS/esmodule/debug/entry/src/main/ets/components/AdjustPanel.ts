@@ -113,45 +113,96 @@ export class AdjustPanel extends ViewPU {
             Column.create();
             Column.width('100%');
             Column.height('100%');
-            Column.padding(20);
-            Column.backgroundColor({ "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Column.borderRadius(16);
+            Column.padding(24);
+            Column.backgroundColor('#ffffff');
+            Column.borderRadius(24);
+            Column.shadow({
+                radius: 20,
+                color: 'rgba(0, 0, 0, 0.08)',
+                offsetX: 0,
+                offsetY: 8
+            });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Header with title and reset button
+            // Header with title and reset button - 美化的标题栏
             Row.create();
-            // Header with title and reset button
+            // Header with title and reset button - 美化的标题栏
             Row.width('100%');
-            // Header with title and reset button
-            Row.margin({ bottom: 16 });
+            // Header with title and reset button - 美化的标题栏
+            Row.margin({ bottom: 20 });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create("参数调整");
-            Text.fontSize(18);
-            Text.fontWeight(FontWeight.Bold);
-            Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
+            Row.create();
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('⚙️ ');
+            Text.fontSize(20);
         }, Text);
         Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create("参数调整");
+            Text.fontSize(20);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor('#2d3748');
+        }, Text);
+        Text.pop();
+        Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Blank.create();
         }, Blank);
         Blank.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel("重置");
-            Button.fontSize(14);
-            Button.fontColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Button.backgroundColor({ "id": 125831061, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Button.borderRadius(8);
-            Button.height(32);
-            Button.padding({ left: 12, right: 12 });
+            // 重置按钮 - 渐变背景
+            Button.createWithChild();
+            // 重置按钮 - 渐变背景
+            Button.linearGradient({
+                angle: 90,
+                colors: [
+                    ['#667eea', 0.0],
+                    ['#764ba2', 1.0]
+                ]
+            });
+            // 重置按钮 - 渐变背景
+            Button.borderRadius(18);
+            // 重置按钮 - 渐变背景
+            Button.height(36);
+            // 重置按钮 - 渐变背景
+            Button.padding({ left: 16, right: 16 });
+            // 重置按钮 - 渐变背景
+            Button.shadow({
+                radius: 8,
+                color: 'rgba(102, 126, 234, 0.3)',
+                offsetX: 0,
+                offsetY: 3
+            });
+            // 重置按钮 - 渐变背景
             Button.onClick(() => {
                 if (this.onReset) {
                     this.onReset();
                 }
             });
         }, Button);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('↺');
+            Text.fontSize(16);
+            Text.fontColor('#ffffff');
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('重置');
+            Text.fontSize(13);
+            Text.fontColor('#ffffff');
+            Text.fontWeight(FontWeight.Medium);
+            Text.margin({ left: 4 });
+        }, Text);
+        Text.pop();
+        Row.pop();
+        // 重置按钮 - 渐变背景
         Button.pop();
-        // Header with title and reset button
+        // Header with title and reset button - 美化的标题栏
         Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // Scrollable slider list
@@ -169,415 +220,168 @@ export class AdjustPanel extends ViewPU {
             Column.create();
             Column.width('100%');
         }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Brightness
-            Column.create();
-            // Brightness
-            Column.width('100%');
-            // Brightness
-            Column.padding({ top: 8, bottom: 8 });
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-            Row.margin({ bottom: 8 });
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('亮度');
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Blank.create();
-        }, Blank);
-        Blank.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(`${Math.round(this.brightnessValue)}`);
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-            Text.textAlign(TextAlign.End);
-        }, Text);
-        Text.pop();
-        Row.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Slider.create({
-                value: this.brightnessValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-            });
-            Slider.blockColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.trackColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.selectedColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.showSteps(false);
-            Slider.showTips(true);
-            Slider.width('100%');
-            Slider.onChange((newValue: number) => {
-                this.brightnessValue = Math.round(newValue);
-            });
-        }, Slider);
-        Row.pop();
-        // Brightness
-        Column.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Contrast
-            Column.create();
-            // Contrast
-            Column.width('100%');
-            // Contrast
-            Column.padding({ top: 8, bottom: 8 });
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-            Row.margin({ bottom: 8 });
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('对比度');
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Blank.create();
-        }, Blank);
-        Blank.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(`${Math.round(this.contrastValue)}`);
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-            Text.textAlign(TextAlign.End);
-        }, Text);
-        Text.pop();
-        Row.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Slider.create({
-                value: this.contrastValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-            });
-            Slider.blockColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.trackColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.selectedColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.showSteps(false);
-            Slider.showTips(true);
-            Slider.width('100%');
-            Slider.onChange((newValue: number) => {
-                this.contrastValue = Math.round(newValue);
-            });
-        }, Slider);
-        Row.pop();
-        // Contrast
-        Column.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Saturation
-            Column.create();
-            // Saturation
-            Column.width('100%');
-            // Saturation
-            Column.padding({ top: 8, bottom: 8 });
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-            Row.margin({ bottom: 8 });
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('饱和度');
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Blank.create();
-        }, Blank);
-        Blank.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(`${Math.round(this.saturationValue)}`);
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-            Text.textAlign(TextAlign.End);
-        }, Text);
-        Text.pop();
-        Row.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Slider.create({
-                value: this.saturationValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-            });
-            Slider.blockColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.trackColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.selectedColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.showSteps(false);
-            Slider.showTips(true);
-            Slider.width('100%');
-            Slider.onChange((newValue: number) => {
-                this.saturationValue = Math.round(newValue);
-            });
-        }, Slider);
-        Row.pop();
-        // Saturation
-        Column.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Hue
-            Column.create();
-            // Hue
-            Column.width('100%');
-            // Hue
-            Column.padding({ top: 8, bottom: 8 });
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-            Row.margin({ bottom: 8 });
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('色相');
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Blank.create();
-        }, Blank);
-        Blank.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(`${Math.round(this.hueValue)}°`);
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-            Text.textAlign(TextAlign.End);
-        }, Text);
-        Text.pop();
-        Row.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Slider.create({
-                value: this.hueValue,
-                min: 0,
-                max: 360,
-                step: 1,
-                style: SliderStyle.OutSet
-            });
-            Slider.blockColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.trackColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.selectedColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.showSteps(false);
-            Slider.showTips(true);
-            Slider.width('100%');
-            Slider.onChange((newValue: number) => {
-                this.hueValue = Math.round(newValue);
-            });
-        }, Slider);
-        Row.pop();
-        // Hue
-        Column.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Warmth
-            Column.create();
-            // Warmth
-            Column.width('100%');
-            // Warmth
-            Column.padding({ top: 8, bottom: 8 });
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-            Row.margin({ bottom: 8 });
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('色温');
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Blank.create();
-        }, Blank);
-        Blank.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(`${Math.round(this.warmthValue)}`);
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-            Text.textAlign(TextAlign.End);
-        }, Text);
-        Text.pop();
-        Row.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Slider.create({
-                value: this.warmthValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-            });
-            Slider.blockColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.trackColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.selectedColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.showSteps(false);
-            Slider.showTips(true);
-            Slider.width('100%');
-            Slider.onChange((newValue: number) => {
-                this.warmthValue = Math.round(newValue);
-            });
-        }, Slider);
-        Row.pop();
-        // Warmth
-        Column.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Exposure
-            Column.create();
-            // Exposure
-            Column.width('100%');
-            // Exposure
-            Column.padding({ top: 8, bottom: 8 });
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-            Row.margin({ bottom: 8 });
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('曝光');
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Blank.create();
-        }, Blank);
-        Blank.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(`${Math.round(this.exposureValue)}`);
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-            Text.textAlign(TextAlign.End);
-        }, Text);
-        Text.pop();
-        Row.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Slider.create({
-                value: this.exposureValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-            });
-            Slider.blockColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.trackColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.selectedColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.showSteps(false);
-            Slider.showTips(true);
-            Slider.width('100%');
-            Slider.onChange((newValue: number) => {
-                this.exposureValue = Math.round(newValue);
-            });
-        }, Slider);
-        Row.pop();
-        // Exposure
-        Column.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // Gamma
-            Column.create();
-            // Gamma
-            Column.width('100%');
-            // Gamma
-            Column.padding({ top: 8, bottom: 8 });
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-            Row.margin({ bottom: 8 });
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('伽马');
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830982, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Blank.create();
-        }, Blank);
-        Blank.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(`${Math.round(this.gammaValue)}`);
-            Text.fontSize(14);
-            Text.fontColor({ "id": 125830983, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Text.width(60);
-            Text.textAlign(TextAlign.End);
-        }, Text);
-        Text.pop();
-        Row.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Slider.create({
-                value: this.gammaValue,
-                min: 0,
-                max: 200,
-                step: 1,
-                style: SliderStyle.OutSet
-            });
-            Slider.blockColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.trackColor({ "id": 125831062, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.selectedColor({ "id": 125830986, "type": 10001, params: [], "bundleName": "com.example.imagefilter", "moduleName": "entry" });
-            Slider.showSteps(false);
-            Slider.showTips(true);
-            Slider.width('100%');
-            Slider.onChange((newValue: number) => {
-                this.gammaValue = Math.round(newValue);
-            });
-        }, Slider);
-        Row.pop();
-        // Gamma
-        Column.pop();
+        // Brightness - 亮度
+        this.SliderItem.bind(this)('💡', '亮度', this.brightnessValue, 0, 200, (newValue: number) => {
+            this.brightnessValue = Math.round(newValue);
+        });
+        // Contrast - 对比度
+        this.SliderItem.bind(this)('🔲', '对比度', this.contrastValue, 0, 200, (newValue: number) => {
+            this.contrastValue = Math.round(newValue);
+        });
+        // Saturation - 饱和度
+        this.SliderItem.bind(this)('🎨', '饱和度', this.saturationValue, 0, 200, (newValue: number) => {
+            this.saturationValue = Math.round(newValue);
+        });
+        // Hue - 色相
+        this.SliderItem.bind(this)('🌈', '色相', this.hueValue, 0, 360, (newValue: number) => {
+            this.hueValue = Math.round(newValue);
+        }, '°');
+        // Warmth - 色温
+        this.SliderItem.bind(this)('🌡️', '色温', this.warmthValue, 0, 200, (newValue: number) => {
+            this.warmthValue = Math.round(newValue);
+        });
+        // Exposure - 曝光
+        this.SliderItem.bind(this)('☀️', '曝光', this.exposureValue, 0, 200, (newValue: number) => {
+            this.exposureValue = Math.round(newValue);
+        });
+        // Gamma - 伽马
+        this.SliderItem.bind(this)('📊', '伽马', this.gammaValue, 0, 200, (newValue: number) => {
+            this.gammaValue = Math.round(newValue);
+        });
         Column.pop();
         // Scrollable slider list
         Scroll.pop();
+        Column.pop();
+    }
+    // 美化的滑块项组件
+    SliderItem(icon: string, label: string, value: number, min: number, max: number, onChange: (value: number) => void, unit: string = '', parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.width('100%');
+            Column.padding({ top: 12, bottom: 12 });
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 标签和数值显示
+            Row.create();
+            // 标签和数值显示
+            Row.width('100%');
+            // 标签和数值显示
+            Row.margin({ bottom: 10 });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 图标和标签
+            Row.create();
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(icon);
+            Text.fontSize(18);
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(label);
+            Text.fontSize(14);
+            Text.fontColor('#4a5568');
+            Text.fontWeight(FontWeight.Medium);
+            Text.margin({ left: 6 });
+        }, Text);
+        Text.pop();
+        // 图标和标签
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Blank.create();
+        }, Blank);
+        Blank.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 数值显示 - 带背景卡片
+            Row.create();
+            // 数值显示 - 带背景卡片
+            Row.padding({ left: 12, right: 12, top: 4, bottom: 4 });
+            // 数值显示 - 带背景卡片
+            Row.backgroundColor('rgba(102, 126, 234, 0.1)');
+            // 数值显示 - 带背景卡片
+            Row.borderRadius(10);
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(`${Math.round(value)}${unit}`);
+            Text.fontSize(14);
+            Text.fontColor('#667eea');
+            Text.fontWeight(FontWeight.Bold);
+        }, Text);
+        Text.pop();
+        // 数值显示 - 带背景卡片
+        Row.pop();
+        // 标签和数值显示
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 滑块轨道 - 自定义样式
+            Stack.create();
+            // 滑块轨道 - 自定义样式
+            Stack.width('100%');
+            // 滑块轨道 - 自定义样式
+            Stack.height(6);
+        }, Stack);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 背景轨道
+            Row.create();
+            // 背景轨道
+            Row.width('100%');
+            // 背景轨道
+            Row.height(6);
+            // 背景轨道
+            Row.backgroundColor('rgba(102, 126, 234, 0.15)');
+            // 背景轨道
+            Row.borderRadius(3);
+        }, Row);
+        // 背景轨道
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 进度填充
+            Row.create();
+            // 进度填充
+            Row.width(`${((value - min) / (max - min)) * 100}%`);
+            // 进度填充
+            Row.height(6);
+            // 进度填充
+            Row.linearGradient({
+                angle: 90,
+                colors: [
+                    ['#667eea', 0.0],
+                    ['#764ba2', 1.0]
+                ]
+            });
+            // 进度填充
+            Row.borderRadius(3);
+        }, Row);
+        // 进度填充
+        Row.pop();
+        // 滑块轨道 - 自定义样式
+        Stack.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 实际滑块（透明，用于交互）
+            Slider.create({
+                value: value,
+                min: min,
+                max: max,
+                step: 1,
+                style: SliderStyle.OutSet
+            });
+            // 实际滑块（透明，用于交互）
+            Slider.blockColor('transparent');
+            // 实际滑块（透明，用于交互）
+            Slider.trackColor('transparent');
+            // 实际滑块（透明，用于交互）
+            Slider.selectedColor('transparent');
+            // 实际滑块（透明，用于交互）
+            Slider.showSteps(false);
+            // 实际滑块（透明，用于交互）
+            Slider.showTips(false);
+            // 实际滑块（透明，用于交互）
+            Slider.width('100%');
+            // 实际滑块（透明，用于交互）
+            Slider.height(20);
+            // 实际滑块（透明，用于交互）
+            Slider.onChange(onChange);
+        }, Slider);
         Column.pop();
     }
     rerender() {
