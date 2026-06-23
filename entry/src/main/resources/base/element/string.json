@@ -1,0 +1,44 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "校园全能助手 - 助力校园生活"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "校园全能助手主入口"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "校园助手"
+    },
+    {
+      "name": "form_label",
+      "value": "校园助手卡片"
+    },
+    {
+      "name": "form_name",
+      "value": "校园助手卡片"
+    },
+    {
+      "name": "form_desc",
+      "value": "展示今日课表和待办事项"
+    },
+    {
+      "name": "permission_internet_reason",
+      "value": "用于获取校园资讯数据"
+    },
+    {
+      "name": "permission_network_reason",
+      "value": "用于检查网络状态"
+    },
+    {
+      "name": "permission_distributed_reason",
+      "value": "用于跨设备同步课程和待办数据"
+    },
+    {
+      "name": "permission_read_media_reason",
+      "value": "用于从相册选择自定义背景图片"
+    }
+  ]
+}

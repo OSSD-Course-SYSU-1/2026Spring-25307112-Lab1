@@ -1,0 +1,27 @@
+{
+  "forms": [
+    {
+      "name": "CampusHelperWidget",
+      "displayName": "$string:form_label",
+      "description": "$string:form_desc",
+      "src": "./ets/pages/WidgetPage.ets",
+      "uiSyntax": "arkts",
+      "window": {
+        "designWidth": 720,
+        "autoDesignWidth": true
+      },
+      "colorMode": "auto",
+      "isDefault": true,
+      "updateEnabled": true,
+      "scheduledUpdateTime": "10:30",
+      "updateDuration": 1,
+      "defaultDimension": "2*2",
+      "supportDimensions": [
+        "2*2",
+        "2*4",
+        "4*4"
+      ],
+      "formConfigAbility": "ability://com.example.campushelper.FormAbility"
+    }
+  ]
+}
